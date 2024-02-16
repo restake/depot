@@ -1,0 +1,59 @@
+---
+# NODES
+- repository: "composable-cosmos"
+  automatic_builds: false
+  project_name: "centauri"
+  architecture: "x86_64"
+  binaries:
+    - "centaurid"
+  builder: "go"
+  builder_version: "1.21.5"
+  cpu: "generic"
+  patches: false
+  purpose: "node"
+
+- repository: "haqq"
+  project_name: "haqq"
+  architecture: "x86_64"
+  binaries:
+    - "haqqd"
+  builder: "go"
+  builder_version: "1.21.5"
+  cpu: "generic"
+  patches: true
+  purpose: "node"
+
+- repository: "jito"
+  project_name: "jito"
+  architecture: "x86_64"
+  binaries:
+    - "solana-validator"
+  builder: "rust"
+  builder_version: "1.76"
+  cpu: "znver4"
+  patches: false
+  purpose: "node"
+
+- repository: "sui"
+  project_name: "sui"
+  architecture: "x86_64"
+  binaries:
+    - "sui"
+    - "sui-node"
+  builder: "rust"
+  builder_version: "1.75"
+  cpu: "znver3"
+  patches: false
+  purpose: "node"
+
+# TOOLS
+- repository: "tmkms"
+  project_name: "tmkms"
+  architecture: "x86_64"
+  binaries:
+    - "tmkms"
+  builder: "rust"
+  builder_version: "1.75"
+  cpu: "generic"
+  patches: false
+  purpose: "tool"
