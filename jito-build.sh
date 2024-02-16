@@ -11,4 +11,4 @@ export CARGO_INCREMENTAL="0"
 
 cargo build --profile release --bin solana-validator
 
-mv -v "target/${CARGO_BUILD_TARGET}/release/solana-validator" "target/${CARGO_BUILD_TARGET}/release/solana-validator-${{ BINARY_VERSION }}"
+mv -v "target/${CARGO_BUILD_TARGET}/release/solana-validator" "target/${CARGO_BUILD_TARGET}/release/solana-validator-$BINARY_VERSION"

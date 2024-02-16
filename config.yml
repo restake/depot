@@ -1,0 +1,22 @@
+---
+- name: "centauri"
+  builder: "go"
+  builder_version: "1.19.0"
+  architectures:
+    - "x86_64"
+    - "arm"
+  binaries:
+    - "centaurid"
+  dockerfile: "centauri"
+  dockerfile_binary: "centaurid"
+
+- name: "jito"
+  builder: "rust"
+  builder_version: "1.19"
+  architectures:
+    - "x86_64"
+    - "arm"
+  binaries:
+    - "jito-solana"
+  dockerfile: "jito-solana"
+  dockerfile_binary: "jito-solana"

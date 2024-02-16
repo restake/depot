@@ -6,45 +6,53 @@ on:
       version:
         description: "Specify the version"
         required: true
-        default: "v0.0.1"
+        default: "v6.3.1"
       repository:
         description: "Specify the repository"
         required: true
-        default: "jito-solana"
+        default: "composable-cosmos"
       organization:
         description: "Specify the organization"
         required: true
-        default: "jito-foundation"
+        default: "ComposableFi"
       protocol:
         description: "Specify the protocol"
         required: true
-        default: "jito"
+        default: "centauri"
+      binaryname:
+        description: "Specify the binary name"
+        required: true
+        default: "centaurid"
   pull_request:
     branches:
       - "master"
 
 env:
-  version: "${{ inputs.version || 'v1.0.0' }}"
-  repository: "${{ inputs.repository || 'jito-solana' }}"
-  organization: "${{ inputs.organization || 'jito-foundation' }}"
-  protocol: "${{ inputs.protocol || 'jito' }}"
+  version: "${{ inputs.version || 'v6.3.1' }}"
+  repository: "${{ inputs.repository || 'composable-cosmos' }}"
+  organization: "${{ inputs.organization || 'ComposableFi' }}"
+  protocol: "${{ inputs.protocol || 'centauri' }}"
+  binaryname: "${{ inputs.protocol || 'centaurid' }}"
 
 jobs:
   build:
     name: "Build"
     runs-on: "ubuntu-latest-l"
     steps:
-      - id: "setup-go"
-        name: "Setup Go"
-        uses: "actions/setup-go@v5"
-        with:
-          go-version: "1.20"
-
       - id: "setup-dependencies"
         name: "Install required system packages"
         run: |
+          sudo add-apt-repository -y ppa:rmescandon/yq
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends build-essential curl git musl-dev
+          sudo apt-get install -y --no-install-recommends build-essential curl git musl-dev jq yq
+
+      - uses: actions/checkout@v2
+      - id: "setup-builder"
+        name: "Setup Builder"
+        run: |
+          chmod +x setup-builder.sh
+          export BINARY_PROTOCOL="${{ env.protocol }}"
+          sh setup-builder.sh
 
       - id: "clone-pipeline"
         name: "Clone pipeline"
@@ -60,25 +68,38 @@ jobs:
           fetch-tags: true
           path: "${{ env.protocol }}"
           ref: "refs/tags/${{ env.version }}"
+          submodules: true
+
+      - id: "apply-patches"
+        name: "Apply patches"
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+
+          cd "${GITHUB_WORKSPACE}/centauri"
+          git am --3way "${GITHUB_WORKSPACE}/pipeline/patches"/*.patch
 
       - name: "Run protocol-specific build script"
         run: |
-          protocol_script=".github/scripts/${{ inputs.repository }}-build.sh"
-
+          protocol_script="${{ env.protocol }}-build.sh"
+          chmod +x ${{ env.protocol }}-build.sh
           if [ -f "$protocol_script" ]; then
-            export BINARY_VERSION="${{ inputs.version }}"
-            export BINARY_PROTOCOL"${{ inputs.protocol }}"
+            export BINARY_VERSION="${{ env.version }}"
+            export BINARY_PROTOCOL="${{ env.protocol }}"
             bash "$protocol_script"
           else
             echo "Error: Invalid repository specified or missing build script '$protocol_script'"
             exit 1
           fi
 
+      - name: List Repository Contents
+        run: ls -R
+  
       - id: "upload-artifact"
         name: "Save binary to workspace"
         uses: "actions/upload-artifact@v3"
         with:
           name: "${{ env.protocol }}-validator"
-          path: "./${{ env.protocol }}/target/release/${{ env.protocol }}-validator-${{ env.version }}"
+          path: "${{ env.protocol }}/bin/${{ env.binaryname }}"
           if-no-files-found: "error"
           retention-days: 1

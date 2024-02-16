@@ -2,7 +2,12 @@
 
 set -euo pipefail
 
-cd centauri
+repository_path=$(pwd)
+cd "$repository_path"
+
+ls -la
+
+cd "$repository_path/centauri"
 
 # Grab static libwasmvm
 wasmvm_version="$(go list -m all | grep -F "github.com/CosmWasm/wasmvm" | awk '{print $2}')"
