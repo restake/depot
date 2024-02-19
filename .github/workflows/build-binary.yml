@@ -1,38 +1,38 @@
 name: "Build Binary"
 
 on:
-  workflow_dispatch:
-    inputs:
-      version:
-        description: "Specify the version"
-        required: true
-        default: "v6.3.1"
-      repository:
-        description: "Specify the repository"
-        required: true
-        default: "composable-cosmos"
-      organization:
-        description: "Specify the organization"
-        required: true
-        default: "ComposableFi"
-      protocol:
-        description: "Specify the protocol"
-        required: true
-        default: "centauri"
-      binaryname:
-        description: "Specify the binary name"
-        required: true
-        default: "centaurid"
+  # workflow_dispatch:
+  #   inputs:
+  #     version:
+  #       description: "Specify the version"
+  #       required: true
+  #       default: "v6.3.1"
+  #     repository:
+  #       description: "Specify the repository"
+  #       required: true
+  #       default: "composable-cosmos"
+  #     organization:
+  #       description: "Specify the organization"
+  #       required: true
+  #       default: "ComposableFi"
+  #     protocol:
+  #       description: "Specify the protocol"
+  #       required: true
+  #       default: "centauri"
+  #     binaryname:
+  #       description: "Specify the binary name"
+  #       required: true
+  #       default: "centaurid"
   pull_request:
     branches:
-      - "master"
+      - "*"
 
 env:
-  version: "${{ inputs.version || 'v6.3.1' }}"
-  repository: "${{ inputs.repository || 'composable-cosmos' }}"
-  organization: "${{ inputs.organization || 'ComposableFi' }}"
-  protocol: "${{ inputs.protocol || 'centauri' }}"
-  binaryname: "${{ inputs.protocol || 'centaurid' }}"
+  version: "${{ inputs.version || 'v1.17.6' }}"
+  repository: "${{ inputs.repository || 'jito-solana' }}"
+  organization: "${{ inputs.organization || 'jito-foundation' }}"
+  protocol: "${{ inputs.protocol || 'jito' }}"
+  binaryname: "${{ inputs.protocol || 'jito-solana-validator' }}"
 
 jobs:
   build:
@@ -47,6 +47,18 @@ jobs:
           sudo apt-get install -y --no-install-recommends build-essential curl git musl-dev jq yq
 
       - uses: actions/checkout@v2
+        if: github.event_name == 'pull_request'
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.ref }}
+      - uses: actions/checkout@v2
+        if: github.event_name != 'pull_request'
+        with:
+          fetch-depth: 0
+
+      - name: "ls la"
+        run: ls -R
+
       - id: "setup-builder"
         name: "Setup Builder"
         run: |
@@ -86,7 +98,8 @@ jobs:
           if [ -f "$protocol_script" ]; then
             export BINARY_VERSION="${{ env.version }}"
             export BINARY_PROTOCOL="${{ env.protocol }}"
-            bash "$protocol_script"
+            export BINARY_NAME="${{ env.binaryname }}"
+            sh "protocol_script"
           else
             echo "Error: Invalid repository specified or missing build script '$protocol_script'"
             exit 1
@@ -103,3 +116,27 @@ jobs:
           path: "${{ env.protocol }}/bin/${{ env.binaryname }}"
           if-no-files-found: "error"
           retention-days: 1
+
+      # - id: "upload-to-bucket"
+      #   name: "Upload artifact to R2 bucket"
+      #   uses: ryand56/r2-upload-actions@latest
+      #   with:
+      #     r2-account-id: ${{ secrets.R2_ACCOUNT_ID }}
+      #     r2-access-key-id: ${{ secrets.R2_ACCESS_KEY_ID }}
+      #     r2-secret-access-key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      #     r2-bucket: ${{ secrets.R2_BUCKET }}
+      #     source-dir: "${{ env.protocol }}/bin/${{ env.binaryname }}"
+      #     destination-dir: "artifacts"
+
+      - id: "setup-rclone"
+        name: "Set up rclone CLI"
+        run: |
+          curl https://rclone.org/install.sh | sudo bash
+
+      - id: "upload-to-r2"
+        name: "Upload binary to R2"
+        run: |
+          curl https://rclone.org/install.sh | sudo bash
+
+      - name: "ls la"
+        run: ls -R
