@@ -1,38 +1,38 @@
 name: "Build Binary"
 
 on:
-  # workflow_dispatch:
-  #   inputs:
-  #     version:
-  #       description: "Specify the version"
-  #       required: true
-  #       default: "v6.3.1"
-  #     repository:
-  #       description: "Specify the repository"
-  #       required: true
-  #       default: "composable-cosmos"
-  #     organization:
-  #       description: "Specify the organization"
-  #       required: true
-  #       default: "ComposableFi"
-  #     protocol:
-  #       description: "Specify the protocol"
-  #       required: true
-  #       default: "centauri"
-  #     binaryname:
-  #       description: "Specify the binary name"
-  #       required: true
-  #       default: "centaurid"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Specify the version"
+        required: true
+        default: "v6.3.1"
+      repository:
+        description: "Specify the repository"
+        required: true
+        default: "composable-cosmos"
+      organization:
+        description: "Specify the organization"
+        required: true
+        default: "ComposableFi"
+      protocol:
+        description: "Specify the protocol"
+        required: true
+        default: "centauri"
+      binaryname:
+        description: "Specify the binary name"
+        required: true
+        default: "centaurid"
   pull_request:
     branches:
-      - "*"
+      - "master"
 
 env:
-  version: "${{ inputs.version || 'v1.17.6' }}"
-  repository: "${{ inputs.repository || 'jito-solana' }}"
-  organization: "${{ inputs.organization || 'jito-foundation' }}"
-  protocol: "${{ inputs.protocol || 'jito' }}"
-  binaryname: "${{ inputs.protocol || 'jito-solana-validator' }}"
+  version: "${{ inputs.version || 'v6.3.1' }}"
+  repository: "${{ inputs.repository || 'composable-cosmos' }}"
+  organization: "${{ inputs.organization || 'ComposableFi' }}"
+  protocol: "${{ inputs.protocol || 'centauri' }}"
+  binaryname: "${{ inputs.protocol || 'centaurid' }}"
 
 jobs:
   build:
@@ -45,27 +45,13 @@ jobs:
           sudo add-apt-repository -y ppa:rmescandon/yq
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends build-essential curl git musl-dev jq yq
-
       - uses: actions/checkout@v2
-        if: github.event_name == 'pull_request'
-        with:
-          fetch-depth: 0
-          ref: ${{ github.event.pull_request.head.ref }}
-      - uses: actions/checkout@v2
-        if: github.event_name != 'pull_request'
-        with:
-          fetch-depth: 0
-
-      - name: "ls la"
-        run: ls -R
-
       - id: "setup-builder"
         name: "Setup Builder"
         run: |
           chmod +x setup-builder.sh
           export BINARY_PROTOCOL="${{ env.protocol }}"
           sh setup-builder.sh
-
       - id: "clone-pipeline"
         name: "Clone pipeline"
         uses: "actions/checkout@v4"
@@ -87,7 +73,6 @@ jobs:
         run: |
           set -euo pipefail
           shopt -s nullglob
-
           cd "${GITHUB_WORKSPACE}/centauri"
           git am --3way "${GITHUB_WORKSPACE}/pipeline/patches"/*.patch
 
@@ -98,8 +83,7 @@ jobs:
           if [ -f "$protocol_script" ]; then
             export BINARY_VERSION="${{ env.version }}"
             export BINARY_PROTOCOL="${{ env.protocol }}"
-            export BINARY_NAME="${{ env.binaryname }}"
-            sh "protocol_script"
+            bash "$protocol_script"
           else
             echo "Error: Invalid repository specified or missing build script '$protocol_script'"
             exit 1
@@ -130,11 +114,6 @@ jobs:
 
       - id: "setup-rclone"
         name: "Set up rclone CLI"
-        run: |
-          curl https://rclone.org/install.sh | sudo bash
-
-      - id: "upload-to-r2"
-        name: "Upload binary to R2"
         run: |
           curl https://rclone.org/install.sh | sudo bash
 
