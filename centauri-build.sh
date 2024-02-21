@@ -19,3 +19,4 @@ make CC="x86_64-linux-musl-gcc" CGO_LDFLAGS="-L." LEDGER_ENABLED=false LINK_STAT
 # Smoke test
 ldd ./bin/centaurid || :
 ./bin/centaurid version --long
+mv $repository_path/centauri/bin/centaurid $repository_path/centauri/bin/centaurid-$BINARY_VERSION-$BINARY_ARCH

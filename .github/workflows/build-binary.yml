@@ -23,6 +23,18 @@ on:
         description: "Specify the binary name"
         required: true
         default: "centaurid"
+      cpu:
+        description: "Specify the cpu"
+        required: true
+        default: "generic"
+      arch:
+        description: "Specify the arch"
+        required: true
+        default: "x86_64"
+      purpose:
+        description: "Specify the purpose"
+        required: true
+        default: "node"
   pull_request:
     branches:
       - "master"
@@ -36,6 +48,9 @@ env:
   cloudflare_key_id: ${{ secrets.R2_ACCESS_KEY_ID }}
   cloudflare_secret: ${{ secrets.R2_SECRET_ACCESS_KEY }}
   cloudflare_account: ${{ secrets.cloudflare_account }}
+  cpu: "${{ inputs.cpu || 'generic' }}"
+  arch: "${{ inputs.arch || 'x86_64' }}"
+  purpose: "${{ inputs.purpose || 'node' }}"
 
 
 jobs:
@@ -85,6 +100,7 @@ jobs:
           protocol_script="${{ env.protocol }}-build.sh"
           chmod +x ${{ env.protocol }}-build.sh
           if [ -f "$protocol_script" ]; then
+            export BINARY_ARCH="${{ env.arch }}"
             export BINARY_VERSION="${{ env.version }}"
             export BINARY_PROTOCOL="${{ env.protocol }}"
             bash "$protocol_script"
@@ -101,20 +117,9 @@ jobs:
         uses: "actions/upload-artifact@v3"
         with:
           name: "${{ env.protocol }}-validator"
-          path: "${{ env.protocol }}/bin/${{ env.binaryname }}"
+          path: "${{ env.protocol }}/bin/${{ env.binaryname }}-${{env.version}}-${{env.arch}}"
           if-no-files-found: "error"
           retention-days: 1
-
-      # - id: "upload-to-bucket"
-      #   name: "Upload artifact to R2 bucket"
-      #   uses: ryand56/r2-upload-actions@latest
-      #   with:
-      #     r2-account-id: ${{ secrets.R2_ACCOUNT_ID }}
-      #     r2-access-key-id: ${{ secrets.R2_ACCESS_KEY_ID }}
-      #     r2-secret-access-key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-      #     r2-bucket: ${{ secrets.R2_BUCKET }}
-      #     source-dir: "${{ env.protocol }}/bin/${{ env.binaryname }}"
-      #     destination-dir: "artifacts"
 
       - id: "setup-rclone"
         name: "Set up rclone CLI"
@@ -133,4 +138,4 @@ jobs:
           export RCLONE_CONFIG_R2_ACL=private
           export RCLONE_CONFIG_R2_NO_CHECK_BUCKET=true
 
-          rclone copy "${{ env.protocol }}/bin/${{ env.binaryname }}" r2:binaries
+          rclone copy "${{ env.protocol }}/bin/${{ env.binaryname }}-${{env.version}}-${{env.arch}}" r2:binaries/${{env.purpose}}/${{env.protocol}}/${{env.version}}
