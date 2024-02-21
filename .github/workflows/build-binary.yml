@@ -6,7 +6,7 @@ on:
       version:
         description: "Specify the version"
         required: true
-        default: "v6.3.1"
+        default: "v1.18.22"
       repository:
         description: "Specify the repository"
         required: true
@@ -40,11 +40,11 @@ on:
       - "master"
 
 env:
-  version: "${{ inputs.version || 'v6.3.1' }}"
-  repository: "${{ inputs.repository || 'composable-cosmos' }}"
-  organization: "${{ inputs.organization || 'ComposableFi' }}"
-  protocol: "${{ inputs.protocol || 'centauri' }}"
-  binaryname: "${{ inputs.protocol || 'centaurid' }}"
+  version: "${{ inputs.version || 'v1.17.22-jito' }}"
+  repository: "${{ inputs.repository || 'jito-solana' }}"
+  organization: "${{ inputs.organization || 'jito-foundation' }}"
+  protocol: "${{ inputs.protocol || 'jito' }}"
+  binaryname: "${{ inputs.binaryname || 'solana-jito' }}"
   cloudflare_key_id: ${{ secrets.R2_ACCESS_KEY_ID }}
   cloudflare_secret: ${{ secrets.R2_SECRET_ACCESS_KEY }}
   cloudflare_account: ${{ secrets.cloudflare_account }}
@@ -68,9 +68,9 @@ jobs:
       - id: "setup-builder"
         name: "Setup Builder"
         run: |
-          chmod +x setup-builder.sh
+          chmod +x ${GITHUB_WORKSPACE}/scripts/setup-builder.sh
           export BINARY_PROTOCOL="${{ env.protocol }}"
-          sh setup-builder.sh
+          sh ${GITHUB_WORKSPACE}/scripts/setup-builder.sh
       - id: "clone-pipeline"
         name: "Clone pipeline"
         uses: "actions/checkout@v4"
@@ -97,7 +97,7 @@ jobs:
 
       - name: "Run protocol-specific build script"
         run: |
-          protocol_script="${{ env.protocol }}-build.sh"
+          protocol_script="${GITHUB_WORKSPACE}/scripts/${{ env.protocol }}-build.sh"
           chmod +x ${{ env.protocol }}-build.sh
           if [ -f "$protocol_script" ]; then
             export BINARY_ARCH="${{ env.arch }}"
