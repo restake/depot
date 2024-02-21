@@ -2,7 +2,12 @@
 
 set -euo pipefail
 
-cd jito-solana
+repository_path=$(pwd)
+cd "$repository_path"
+
+ls -la
+
+cd "$repository_path/jito"
 
 export CI_COMMIT=$(git rev-parse HEAD)
 export CARGO_BUILD_TARGET="x86_64-unknown-linux-gnu"
@@ -11,4 +16,5 @@ export CARGO_INCREMENTAL="0"
 
 cargo build --profile release --bin solana-validator
 
-mv -v "target/${CARGO_BUILD_TARGET}/release/solana-validator" "${BINARY_PROTOCOL}/bin/$BINARY_NAME-$BINARY_VERSION-$BINARY_ARCH"
+mkdir "$repository_path/jito/bin"
+mv -v "target/${CARGO_BUILD_TARGET}/release/solana-validator" "$repository_path/jito/bin/$BINARY_NAME-$BINARY_CPU-$BINARY_ARCH"

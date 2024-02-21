@@ -35,22 +35,27 @@ on:
         description: "Specify the purpose"
         required: true
         default: "node"
+      patches:
+        description: "Specify the patch condition"
+        required: true
+        default: "false"
   pull_request:
     branches:
       - "master"
 
 env:
-  version: "${{ inputs.version || 'v1.17.22-jito' }}"
-  repository: "${{ inputs.repository || 'jito-solana' }}"
-  organization: "${{ inputs.organization || 'jito-foundation' }}"
-  protocol: "${{ inputs.protocol || 'jito' }}"
-  binaryname: "${{ inputs.binaryname || 'solana-jito' }}"
+  version: "${{ inputs.version || 'testnet-v1.19.0' }}"
+  repository: "${{ inputs.repository || 'sui' }}"
+  organization: "${{ inputs.organization || 'MystenLabs' }}"
+  protocol: "${{ inputs.protocol || 'sui' }}"
+  binaryname: "${{ inputs.binaryname || 'sui' }}"
   cloudflare_key_id: ${{ secrets.R2_ACCESS_KEY_ID }}
   cloudflare_secret: ${{ secrets.R2_SECRET_ACCESS_KEY }}
   cloudflare_account: ${{ secrets.cloudflare_account }}
   cpu: "${{ inputs.cpu || 'generic' }}"
   arch: "${{ inputs.arch || 'x86_64' }}"
   purpose: "${{ inputs.purpose || 'node' }}"
+  patches: "${{ inputs.patches || 'false' }}"
 
 
 jobs:
@@ -58,19 +63,29 @@ jobs:
     name: "Build"
     runs-on: "ubuntu-latest-l"
     steps:
+      - uses: actions/checkout@v2
+
+      - name: Use Deno Version 1.41.0
+        uses: denolib/setup-deno@v2
+        with:
+          deno-version: 1.41.0
+
       - id: "setup-dependencies"
         name: "Install required system packages"
         run: |
           sudo add-apt-repository -y ppa:rmescandon/yq
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends build-essential curl git musl-dev jq yq
-      - uses: actions/checkout@v2
+          chmod +x ${GITHUB_WORKSPACE}/dependencies/${{env.protocol}}-dependencies.sh
+          bash ${GITHUB_WORKSPACE}/dependencies/${{env.protocol}}-dependencies.sh
+
       - id: "setup-builder"
         name: "Setup Builder"
         run: |
           chmod +x ${GITHUB_WORKSPACE}/scripts/setup-builder.sh
           export BINARY_PROTOCOL="${{ env.protocol }}"
           sh ${GITHUB_WORKSPACE}/scripts/setup-builder.sh
+
       - id: "clone-pipeline"
         name: "Clone pipeline"
         uses: "actions/checkout@v4"
@@ -89,45 +104,79 @@ jobs:
 
       - id: "apply-patches"
         name: "Apply patches"
+        if: ${{ env.patches == 'true' }}
         run: |
           set -euo pipefail
           shopt -s nullglob
-          cd "${GITHUB_WORKSPACE}/centauri"
+          cd "${GITHUB_WORKSPACE}/${{ env.protocol }}"
           git am --3way "${GITHUB_WORKSPACE}/pipeline/patches"/*.patch
 
       - name: "Run protocol-specific build script"
         run: |
           protocol_script="${GITHUB_WORKSPACE}/scripts/${{ env.protocol }}-build.sh"
-          chmod +x ${{ env.protocol }}-build.sh
+          chmod +x ${GITHUB_WORKSPACE}/scripts/${{ env.protocol }}-build.sh
           if [ -f "$protocol_script" ]; then
             export BINARY_ARCH="${{ env.arch }}"
+            export BINARY_CPU="${{ env.cpu }}"
             export BINARY_VERSION="${{ env.version }}"
             export BINARY_PROTOCOL="${{ env.protocol }}"
+            export BINARY_NAME="${{ env.binaryname }}"
             bash "$protocol_script"
           else
             echo "Error: Invalid repository specified or missing build script '$protocol_script'"
             exit 1
           fi
 
-      - name: List Repository Contents
-        run: ls -R
-  
-      - id: "upload-artifact"
+      - id: "show-env"
+        name: "Show files"
+        run: |
+          set -x
+          ls -la
+
+      - id: "generate-paths"
+        name: "Generate binaries paths"
+        run: |
+          export BINARY_ARCH="${{ env.arch }}"
+          export BINARY_CPU="${{ env.cpu }}"
+          export BINARY_VERSION="${{ env.version }}"
+          export BINARY_PROTOCOL="${{ env.protocol }}"
+          export BINARY_NAME="${{ env.binaryname }}"
+          deno run --allow-read --allow-env --allow-write set-binaries.ts
+
+      - id: "generate-var"
+        name: "Generate binaries github variable"
+        run: |
+          echo $ENVVAR_BINARIES
+
+      - id: "upload-artifacts"
         name: "Save binary to workspace"
         uses: "actions/upload-artifact@v3"
         with:
-          name: "${{ env.protocol }}-validator"
-          path: "${{ env.protocol }}/bin/${{ env.binaryname }}-${{env.version}}-${{env.arch}}"
+          name: "binaries"
+          path: "${{env.ENVVAR_BINARIES}}"
           if-no-files-found: "error"
           retention-days: 1
+
+  upload:
+    name: "Upload"
+    needs: "build"
+    runs-on: "ubuntu-latest"
+    if: "${{ github.event_name == 'workflow_dispatch' }}"
+    steps:
+      - id: "download-artifacts"
+        name: "Download binaries from workspace"
+        uses: "actions/download-artifact@v3"
+        with:
+          name: "${{ env.binaryname }}-${{env.cpu}}-${{env.arch}}"
+          path: "binaries"
 
       - id: "setup-rclone"
         name: "Set up rclone CLI"
         run: |
           curl https://rclone.org/install.sh | sudo bash
 
-      - id: "substitue-rclone-config"
-        name: Substitute Variables in rclone Template
+      - id: "upload-binary"
+        name: Upload binary to R2 bucket
         run: |
           export RCLONE_CONFIG_R2_TYPE=s3
           export RCLONE_CONFIG_R2_ACCESS_KEY_ID=${{env.cloudflare_key_id}}
@@ -138,4 +187,31 @@ jobs:
           export RCLONE_CONFIG_R2_ACL=private
           export RCLONE_CONFIG_R2_NO_CHECK_BUCKET=true
 
-          rclone copy "${{ env.protocol }}/bin/${{ env.binaryname }}-${{env.version}}-${{env.arch}}" r2:binaries/${{env.purpose}}/${{env.protocol}}/${{env.version}}
+          rclone copy "binaries/${{ env.binaryname }}-${{env.cpu}}-${{env.arch}}" r2:binaries/${{env.purpose}}/${{env.protocol}}/${{env.version}}
+
+  publish:
+    name: "Publish"
+    needs: "build"
+    runs-on: "ubuntu-latest"
+    if: "${{ github.event_name == 'workflow_dispatch' }}"
+    steps:
+      - id: "download-artifact"
+        name: "Download binary from workspace"
+        uses: "actions/download-artifact@v3"
+        with:
+          name: "${{ env.binaryname }}-${{env.cpu}}-${{env.arch}}"
+          path: "binaries"
+
+      - id: "publish"
+        name: "Publish Github release"
+        uses: "softprops/action-gh-release@v1"
+        with:
+          body: |
+            For changes, see here: https://github.com/${{ env.organization }}/${{env.repository}}/releases/tag/${{ env.version }}
+          files: |
+            ${{ env.binaryname }}-${{ env.version }}
+          tag_name: "${{ env.version }}"
+          draft: false
+          prerelease: false
+          fail_on_unmatched_files: true
+          generate_release_notes: true

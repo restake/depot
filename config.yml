@@ -2,6 +2,7 @@
 - name: "centauri"
   builder: "go"
   builder_version: "1.19.0"
+  binary_name: "centaurid"
   architectures:
     - "x86_64"
     - "arm"
@@ -10,9 +11,22 @@
   dockerfile: "centauri"
   dockerfile_binary: "centaurid"
 
+- name: "sui"
+  builder: "rust"
+  builder_version: "1.19"
+  binary_name: "solana-validator"
+  architectures:
+    - "x86_64"
+  binaries:
+    - "sui"
+    - "suinode"
+  dockerfile: "jito-solana"
+  dockerfile_binary: "jito-solana"
+
 - name: "jito"
   builder: "rust"
   builder_version: "1.19"
+  binary_name: "solana-validator"
   architectures:
     - "x86_64"
     - "arm"
