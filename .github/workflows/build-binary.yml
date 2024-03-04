@@ -54,7 +54,7 @@ env:
   cloudflare_account: ${{ secrets.cloudflare_account }}
   cpu: "${{ inputs.cpu || 'generic' }}"
   arch: "${{ inputs.arch || 'x86_64' }}"
-  purpose: "${{ inputs.purpose || 'node' }}"
+  purpose: "${{ inputs.purpose || 'test' }}"
   patches: "${{ inputs.patches || 'false' }}"
 
 
@@ -161,13 +161,12 @@ jobs:
     name: "Upload"
     needs: "build"
     runs-on: "ubuntu-latest"
-    if: "${{ github.event_name == 'workflow_dispatch' }}"
     steps:
       - id: "download-artifacts"
         name: "Download binaries from workspace"
         uses: "actions/download-artifact@v3"
         with:
-          name: "${{ env.binaryname }}-${{env.cpu}}-${{env.arch}}"
+          name: "binaries"
           path: "binaries"
 
       - id: "setup-rclone"
@@ -178,6 +177,7 @@ jobs:
       - id: "upload-binary"
         name: Upload binary to R2 bucket
         run: |
+          set -euo pipefail
           export RCLONE_CONFIG_R2_TYPE=s3
           export RCLONE_CONFIG_R2_ACCESS_KEY_ID=${{env.cloudflare_key_id}}
           export RCLONE_CONFIG_R2_SECRET_ACCESS_KEY=${{env.cloudflare_secret}}
@@ -187,7 +187,12 @@ jobs:
           export RCLONE_CONFIG_R2_ACL=private
           export RCLONE_CONFIG_R2_NO_CHECK_BUCKET=true
 
-          rclone copy "binaries/${{ env.binaryname }}-${{env.cpu}}-${{env.arch}}" r2:binaries/${{env.purpose}}/${{env.protocol}}/${{env.version}}
+          for file in binaries/*; do
+            if [ -f "$file" ]; then
+              filename=$(basename "$file")
+              rclone copy "$file" "r2:binaries/${{env.purpose}}/${{env.protocol}}/${{env.version}}/${filename}"
+            fi
+          done
 
   publish:
     name: "Publish"
