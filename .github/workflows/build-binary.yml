@@ -39,6 +39,9 @@ on:
         description: "Specify the patch condition"
         required: true
         default: "false"
+  repository_dispatch:
+    types:
+      - webhook
   pull_request:
     branches:
       - "master"
@@ -127,12 +130,6 @@ jobs:
             exit 1
           fi
 
-      - id: "show-env"
-        name: "Show files"
-        run: |
-          set -x
-          ls -la
-
       - id: "generate-paths"
         name: "Generate binaries paths"
         run: |
@@ -142,11 +139,6 @@ jobs:
           export BINARY_PROTOCOL="${{ env.protocol }}"
           export BINARY_NAME="${{ env.binaryname }}"
           deno run --allow-read --allow-env --allow-write set-binaries.ts
-
-      - id: "generate-var"
-        name: "Generate binaries github variable"
-        run: |
-          echo $ENVVAR_BINARIES
 
       - id: "upload-artifacts"
         name: "Save binary to workspace"
@@ -194,29 +186,29 @@ jobs:
             fi
           done
 
-  publish:
-    name: "Publish"
-    needs: "build"
-    runs-on: "ubuntu-latest"
-    if: "${{ github.event_name == 'workflow_dispatch' }}"
-    steps:
-      - id: "download-artifact"
-        name: "Download binary from workspace"
-        uses: "actions/download-artifact@v3"
-        with:
-          name: "${{ env.binaryname }}-${{env.cpu}}-${{env.arch}}"
-          path: "binaries"
+  # publish:
+  #   name: "Publish"
+  #   needs: "build"
+  #   runs-on: "ubuntu-latest"
+  #   if: "${{ github.event_name == 'workflow_dispatch' }}"
+  #   steps:
+  #     - id: "download-artifact"
+  #       name: "Download binary from workspace"
+  #       uses: "actions/download-artifact@v3"
+  #       with:
+  #         name: "${{ env.binaryname }}-${{env.cpu}}-${{env.arch}}"
+  #         path: "binaries"
 
-      - id: "publish"
-        name: "Publish Github release"
-        uses: "softprops/action-gh-release@v1"
-        with:
-          body: |
-            For changes, see here: https://github.com/${{ env.organization }}/${{env.repository}}/releases/tag/${{ env.version }}
-          files: |
-            ${{ env.binaryname }}-${{ env.version }}
-          tag_name: "${{ env.version }}"
-          draft: false
-          prerelease: false
-          fail_on_unmatched_files: true
-          generate_release_notes: true
+  #     - id: "publish"
+  #       name: "Publish Github release"
+  #       uses: "softprops/action-gh-release@v1"
+  #       with:
+  #         body: |
+  #           For changes, see here: https://github.com/${{ env.organization }}/${{env.repository}}/releases/tag/${{ env.version }}
+  #         files: |
+  #           ${{ env.binaryname }}-${{ env.version }}
+  #         tag_name: "${{ env.version }}"
+  #         draft: false
+  #         prerelease: false
+  #         fail_on_unmatched_files: true
+  #         generate_release_notes: true
