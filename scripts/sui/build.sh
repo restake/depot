@@ -14,5 +14,5 @@ cargo build --release --bin sui-node --bin sui
 
 set -x
 
-mv -v "target/${CARGO_BUILD_TARGET}/release/sui" "$repository_path/$protocol/bin/sui-$BINARY_CPU-$BINARY_ARCH"
-mv -v "target/${CARGO_BUILD_TARGET}/release/sui-node" "$repository_path/$protocol/bin/suinode-$BINARY_CPU-$BINARY_ARCH"
+mv -v "target/${CARGO_BUILD_TARGET}/release/sui" "$repository_path/${DEPOT_NAME}/bin/sui-${DEPOT_CPU}-${DEPOT_ARCHITECTURE}"
+mv -v "target/${CARGO_BUILD_TARGET}/release/sui-node" "$repository_path/${DEPOT_NAME}/bin/suinode-${DEPOT_CPU}-${DEPOT_ARCHITECTURE}"

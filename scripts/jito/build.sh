@@ -17,4 +17,4 @@ export CARGO_INCREMENTAL="0"
 cargo build --profile release --bin solana-validator
 
 mkdir "$repository_path/jito/bin"
-mv -v "target/${CARGO_BUILD_TARGET}/release/solana-validator" "$repository_path/jito/bin/$BINARY_NAME-$BINARY_CPU-$BINARY_ARCH"
+mv -v "target/${CARGO_BUILD_TARGET}/release/solana-validator" "$repository_path/jito/bin/solana-validator-${DEPOT_CPU}-${DEPOT_ARCHITECTURE}"

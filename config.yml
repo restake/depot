@@ -1,36 +1,43 @@
 ---
-- name: "centauri"
-  builder: "go"
-  builder_version: "1.19.0"
-  binary_name: "centaurid"
+- repository: "composable-cosmos"
+  name: "centauri"
   architectures:
     - "x86_64"
-    - "arm"
   binaries:
     - "centaurid"
+  builder: "go"
+  builder_version: "1.21.5"
+  cpu: "generic"
   dockerfile: "centauri"
   dockerfile_binary: "centaurid"
+  patches: false
+  purpose: "testing"
 
-- name: "sui"
-  builder: "rust"
-  builder_version: "1.19"
-  binary_name: "solana-validator"
+- repository: "sui"
+  name: "sui"
   architectures:
     - "x86_64"
   binaries:
     - "sui"
     - "suinode"
-  dockerfile: "jito-solana"
-  dockerfile_binary: "jito-solana"
-
-- name: "jito"
   builder: "rust"
-  builder_version: "1.19"
-  binary_name: "solana-validator"
+  builder_version: "1.75"
+  cpu: "generic"
+  dockerfile: "sui-dockerfile"
+  dockerfile_binary: "suinode"
+  patches: false
+  purpose: "testing"
+
+- repository: "jito"
+  name: "jito"
   architectures:
     - "x86_64"
-    - "arm"
   binaries:
-    - "jito-solana"
+    - "solana-validator"
+  builder: "rust"
+  builder_version: "1.76"
+  cpu: "generic"
   dockerfile: "jito-solana"
   dockerfile_binary: "jito-solana"
+  patches: false
+  purpose: "testing"
