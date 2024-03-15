@@ -1,7 +1,7 @@
 import { parse } from "https://deno.land/std@0.207.0/yaml/mod.ts";
 
 const DEPOT_CONFIG_PATH = "config.yml";
-const DEPOT_REPO_NAME = Deno.env.get("DEPOT_REPOSITORY_NAME") ?? "composable-cosmos";
+const DEPOT_REPO_NAME = Deno.env.get("DEPOT_REPOSITORY_NAME");
 
 const GITHUB_ENV_PATH = Deno.env.get("GITHUB_ENV");
 const GITHUB_IS_CI = Deno.env.get("CI");
@@ -21,7 +21,7 @@ export type DepotProject = {
     purpose: string;
 };
 
-export const build = async (repositoryName: string): Promise<void> => {
+const build = async (repositoryName: string): Promise<void> => {
     const config = await getConfig(DEPOT_CONFIG_PATH) as DepotProject[];
     const project = config.find((project) =>
         project.repository === repositoryName
@@ -58,13 +58,13 @@ const setEnv = async (key: string, value: string | string[] | boolean): Promise<
     }
 };
 
-const getProjectBinaries = (project: DepotProject) => {
+const getProjectBinaries = (project: DepotProject): string => {
     return project.binaries.flatMap(binary => project.architectures.map(arch => {
         return `${project.name}/bin/${binary}-${project.cpu}-${arch}`
     })).join("\n");
 };
 
-const getRandomNumber = () => {
+const getRandomNumber = (): number => {
     return Math.floor(100000 + Math.random() * 900000);
 };
 
@@ -81,4 +81,7 @@ const getConfig = async (filepath: string) => {
 
 if (DEPOT_REPO_NAME) {
     build(DEPOT_REPO_NAME);
+} else {
+    console.error("DEPOT_REPOSITORY_NAME is not set");
+    Deno.exit(1);
 }
