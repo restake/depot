@@ -47,7 +47,7 @@ jobs:
 
       - id: "setup-envvars"
         name: "Set up environment variables"
-        run: deno run --allow-write --allow-env --allow-read=config.yml ./parser/main.ts
+        run: deno run --allow-write --allow-env --allow-read=config.yml ./utils/set-env.ts
 
       - id: "setup-common-packages"
         name: "Install common packages"
