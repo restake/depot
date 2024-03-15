@@ -92,7 +92,7 @@ jobs:
         uses: "actions/upload-artifact@v3"
         with:
           name: "binaries"
-          path: "${{env.DEPOT_MULTILINE_BINARIES}}"
+          path: "${{env.DEPOT_BINARIES}}"
           if-no-files-found: "error"
           retention-days: 1
 
