@@ -30,7 +30,6 @@ env:
   CLOUDFLARE_SECRET: ${{ secrets.R2_SECRET_ACCESS_KEY }}
   CLOUDFLARE_ACCOUNT: ${{ secrets.cloudflare_account }}
 
-
 jobs:
   build:
     name: "Build"
@@ -65,14 +64,6 @@ jobs:
         name: "Setup builder"
         run: bash ./builders/${{ env.DEPOT_BUILDER }}/setup.sh
 
-      - id: "see-files"
-        run: |
-          pwd
-          ls -la
-
-      - id: "see-envvar"
-        run: printenv | grep DEPOT_
-
       - id: "clone"
         name: "Clone Protocol source"
         uses: "actions/checkout@v4"
@@ -91,11 +82,6 @@ jobs:
           shopt -s nullglob
           cd "${GITHUB_WORKSPACE}/${{ env.DEPOT_NAME }}"
           git am --3way "${GITHUB_WORKSPACE}/pipeline/patches"/*.patch
-
-      - id: "see-files-again"
-        run: |
-          pwd
-          ls -la
 
       - id: "build-binaries"
         name: "Run protocol-specific build script"
