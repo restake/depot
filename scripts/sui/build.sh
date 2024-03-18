@@ -14,5 +14,8 @@ cargo build --release --bin sui-node --bin sui
 
 set -x
 
-mv -v "target/${CARGO_BUILD_TARGET}/release/sui" "$repository_path/${DEPOT_NAME}/bin/sui-${DEPOT_CPU}-${DEPOT_ARCHITECTURE}"
-mv -v "target/${CARGO_BUILD_TARGET}/release/sui-node" "$repository_path/${DEPOT_NAME}/bin/suinode-${DEPOT_CPU}-${DEPOT_ARCHITECTURE}"
+build_binaries="$(deno run --allow-read --allow-env ../utils/binaries.ts)"
+
+echo "${build_binaries}" | jq -r 'to_entries[] | "\(.key) \(.value)"' | while read -r binary path; do
+    mv -v "target/${CARGO_BUILD_TARGET}/release/${binary}" "${path}"
+done

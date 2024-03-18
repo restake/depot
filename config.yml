@@ -1,8 +1,7 @@
 ---
 - repository: "composable-cosmos"
   name: "centauri"
-  architectures:
-    - "x86_64"
+  architecture: "x86_64"
   binaries:
     - "centaurid"
   builder: "go"
@@ -15,23 +14,21 @@
 
 - repository: "sui"
   name: "sui"
-  architectures:
-    - "x86_64"
+  architecture: "x86_64"
   binaries:
     - "sui"
-    - "suinode"
+    - "sui-node"
   builder: "rust"
   builder_version: "1.75"
   cpu: "generic"
   dockerfile: "sui-dockerfile"
-  dockerfile_binary: "suinode"
+  dockerfile_binary: "sui-node"
   patches: false
   purpose: "testing"
 
 - repository: "jito"
   name: "jito"
-  architectures:
-    - "x86_64"
+  architecture: "x86_64"
   binaries:
     - "solana-validator"
   builder: "rust"
