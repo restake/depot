@@ -6,12 +6,14 @@ cd "$repository_path"
 
 ls -la
 
-# Grab static libwasmvm
-wasmvm_version="$(go list -m all "$repository_path/centauri" | grep -F "github.com/CosmWasm/wasmvm" | awk '{print $2}')"
-curl -JLO "https://github.com/CosmWasm/wasmvm/releases/download/${wasmvm_version}/libwasmvm_muslc.x86_64.a" -o "${repository_path}/centauri/libwasmvm_muslc.x86_64.a"
-ln -s "$repository_path/centauri/libwasmvm_muslc.x86_64.a" "$repository_path/centauri/libwasmvm.x86_64.a"
+cd centauri
 
-OBJDIR=$repository_path/centauri make CC="x86_64-linux-musl-gcc" CGO_LDFLAGS="-L." LEDGER_ENABLED=false LINK_STATICALLY=true build
+# Grab static libwasmvm
+wasmvm_version="$(go list -m all | grep -F "github.com/CosmWasm/wasmvm" | awk '{print $2}')"
+curl -JLO "https://github.com/CosmWasm/wasmvm/releases/download/${wasmvm_version}/libwasmvm_muslc.x86_64.a"
+ln -s libwasmvm_muslc.x86_64.a libwasmvm.x86_64.a
+
+make CC="x86_64-linux-musl-gcc" CGO_LDFLAGS="-L." LEDGER_ENABLED=false LINK_STATICALLY=true build
 
 # Smoke test
 ldd ./bin/centaurid || :
