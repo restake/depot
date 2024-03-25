@@ -11,16 +11,26 @@ const build = async (repositoryName: string): Promise<void> => {
         throw new Error(`Project ${repositoryName} not found in config file`);
     }
 
+    // Set automatic_builds to true by default
+    let automaticBuilds = true;
+    if (project.automatic_builds !== undefined && !project.automatic_builds) {
+        automaticBuilds = false;
+    }
+
+    // Whether to build binaries automatically or not
+    await setEnv(`DEPOT_AUTOMATIC_BUILDS`, automaticBuilds.toString());
+
     // The binaries we need to build for given project.
     await setEnv("DEPOT_BINARIES", await getProjectBinaryNames(project));
     await setEnv("DEPOT_BINARY_PATHS", await getProjectBinaryNames(project, true));
 
     for (const key in project) {
-        // Binaries is a special case, we have already set it.
-        if (key == "binaries") {
+        // Binaries and automatic_builds are a special case, we have already set these.
+        if (key == "binaries" || key == "automatic_builds") {
             continue;
+        } else if (project[key as keyof DepotProject] !== undefined) {
+            await setEnv(`DEPOT_${key.toUpperCase()}`, project[key as keyof DepotProject] || '');
         }
-        await setEnv(`DEPOT_${key.toUpperCase()}`, project[key as keyof DepotProject]);
     }
 };
 

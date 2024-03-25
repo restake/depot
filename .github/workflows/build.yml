@@ -23,9 +23,9 @@ on:
       - "master"
 
 env:
-  DEPOT_BINARY_VERSION: "${{ inputs.binary_version || 'v6.4.3' }}"
-  DEPOT_REPOSITORY_ORG: "${{ inputs.repository_org || 'ComposableFi' }}"
-  DEPOT_REPOSITORY_NAME: "${{ inputs.repository_name || 'composable-cosmos' }}"
+  DEPOT_BINARY_VERSION: "${{ inputs.binary_version || 'v0.12.2' }}"
+  DEPOT_REPOSITORY_ORG: "${{ inputs.repository_org || 'iqlusioninc' }}"
+  DEPOT_REPOSITORY_NAME: "${{ inputs.repository_name || 'tmkms' }}"
   DEPOT_BUCKET_NAME: "depot"
   DEPOT_BUCKET_PUBLIC_URL: "https://depot.r2.restake.cloud"
   SLACK_BOT_TOKEN: "${{ secrets.SLACK_BOT_TOKEN }}"
@@ -39,6 +39,7 @@ jobs:
       depot_binaries: "${{ steps.set-outputs.outputs.depot_binaries }}"
       depot_purpose: "${{ steps.set-outputs.outputs.depot_purpose }}"
       depot_project_name: "${{ steps.set-outputs.outputs.depot_project_name }}"
+      depot_automatic_builds: "${{ steps.set-outputs.outputs.depot_automatic_builds }}"
     steps:
       - id: "checkout"
         name: "Checkout code"
@@ -57,9 +58,19 @@ jobs:
       - id: "set-outputs"
         name: "Set outputs to use in other jobs"
         run: |
-          echo "depot_binaries=${{ env.DEPOT_BINARIES }}" >> $GITHUB_OUTPUT
+          echo "depot_automatic_builds=${{ env.DEPOT_AUTOMATIC_BUILDS }}" >> $GITHUB_OUTPUT
           echo "depot_purpose=${{ env.DEPOT_PURPOSE }}" >> $GITHUB_OUTPUT
           echo "depot_project_name=${{ env.DEPOT_PROJECT_NAME }}" >> $GITHUB_OUTPUT
+          printf "depot_binaries=%s" "${DEPOT_BINARIES//$'\n'/\\n}" >> $GITHUB_OUTPUT
+
+      - id: "early-exit"
+        name: "Early exit"
+        if: ${{ env.DEPOT_AUTOMATIC_BUILDS == 'false' }}
+        run: |
+          gh run cancel ${{ github.run_id}}
+          gh run watch ${{ github.run_id}}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - id: "setup-builder-packages"
         name: "Install builder packages"
@@ -113,6 +124,7 @@ jobs:
     name: "Upload"
     needs: "build"
     runs-on: "ubuntu-latest"
+    if: ${{ needs.build.outputs.depot_automatic_builds == 'true' }}
     steps:
       - id: "checkout"
         name: "Checkout code"
@@ -157,7 +169,7 @@ jobs:
     name: "Notify on Slack"
     runs-on: "ubuntu-latest"
     needs: ["build", "upload"]
-    if: ${{ always() }}
+    if: ${{ needs.build.outputs.depot_automatic_builds == 'true' && needs.build.result == 'success' || needs.upload.result == 'success' || needs.build.result != 'success' || needs.upload.result != 'success' }}
     outputs:
       build-status: ${{ needs.build.result }}
       upload-status: ${{ needs.upload.result }}
