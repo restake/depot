@@ -1,13 +1,8 @@
-#!/bin/bash
-
+#!/usr/bin/env bash
 set -euo pipefail
 
-repository_path=$(pwd)
-cd "$repository_path"
-
-ls -la
-
-cd "$repository_path/jito"
+cd jito
+mkdir bin
 
 export CI_COMMIT=$(git rev-parse HEAD)
 export CARGO_BUILD_TARGET="x86_64-unknown-linux-gnu"
@@ -16,5 +11,8 @@ export CARGO_INCREMENTAL="0"
 
 cargo build --profile release --bin solana-validator
 
-mkdir "$repository_path/jito/bin"
-mv -v "target/${CARGO_BUILD_TARGET}/release/solana-validator" "$repository_path/jito/bin/solana-validator-${DEPOT_CPU}-${DEPOT_ARCHITECTURES}"
+build_binaries="$(deno run --allow-read --allow-env ../utils/binaries.ts)"
+
+echo "${build_binaries}" | jq -r 'to_entries[] | "\(.key) \(.value)"' | while read -r binary path; do
+    mv -v "target/${CARGO_BUILD_TARGET}/release/${binary}" "${path}"
+done

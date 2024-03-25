@@ -1,5 +1,5 @@
 import { getConfig } from "./config.ts";
-import { getBinaries, getBinaryNames } from "./binaries.ts";
+import { getBinaries } from "./binaries.ts";
 
 import { DEPOT_CONFIG_PATH, DEPOT_REPO_NAME, GITHUB_ENV_PATH, GITHUB_IS_CI } from "./config.ts";
 import { DepotProject } from "./types.ts";
@@ -12,9 +12,8 @@ const build = async (repositoryName: string): Promise<void> => {
     }
 
     // The binaries we need to build for given project.
-    await setEnv("DEPOT_BINARIES", await getProjectBinaries(project));
-
-    await setEnv("DEPOT_BINARYNAMES", await getProjectBinaryNames(project));
+    await setEnv("DEPOT_BINARIES", await getProjectBinaryNames(project));
+    await setEnv("DEPOT_BINARY_PATHS", await getProjectBinaryNames(project, true));
 
     for (const key in project) {
         // Binaries is a special case, we have already set it.
@@ -41,17 +40,14 @@ const setEnv = async (key: string, value: string | string[] | boolean): Promise<
     }
 };
 
-const getProjectBinaryNames= async (project: DepotProject): Promise<string> => {
-    const binaries = await getBinaryNames(project.repository);
-    return project.binaries.map((binary) => {
-        return binaries[binary];
-    }).join("\n");
-};
-
-const getProjectBinaries = async (project: DepotProject): Promise<string> => {
+const getProjectBinaryNames = async (project: DepotProject, withFullpath: boolean = false): Promise<string> => {
     const binaries = await getBinaries(project.repository);
     return project.binaries.map((binary) => {
-        return binaries[binary];
+        if (!withFullpath) {
+            return binaries[binary].split("/").pop();
+        } else {
+            return binaries[binary];
+        }
     }).join("\n");
 };
 

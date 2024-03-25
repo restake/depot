@@ -1,40 +1,48 @@
 ---
+# NODES
 - repository: "composable-cosmos"
-  name: "centauri"
+  project_name: "centauri"
   architecture: "x86_64"
   binaries:
     - "centaurid"
   builder: "go"
   builder_version: "1.21.5"
   cpu: "generic"
-  dockerfile: "centauri"
-  dockerfile_binary: "centaurid"
   patches: false
-  purpose: "testing"
+  purpose: "node"
+
+- repository: "haqq"
+  project_name: "haqq"
+  architecture: "x86_64"
+  binaries:
+    - "haqqd"
+  builder: "go"
+  builder_version: "1.21.5"
+  cpu: "generic"
+  patches: true
+  purpose: "node"
+
+- repository: "jito"
+  project_name: "jito"
+  architecture: "x86_64"
+  binaries:
+    - "solana-validator"
+  builder: "rust"
+  builder_version: "1.76"
+  cpu: "znver4"
+  patches: false
+  purpose: "node"
 
 - repository: "sui"
-  name: "sui"
+  project_name: "sui"
   architecture: "x86_64"
   binaries:
     - "sui"
     - "sui-node"
   builder: "rust"
   builder_version: "1.75"
-  cpu: "generic"
-  dockerfile: "sui-dockerfile"
-  dockerfile_binary: "sui-node"
+  cpu: "znver3"
   patches: false
-  purpose: "testing"
+  purpose: "node"
 
-- repository: "jito"
-  name: "jito"
-  architecture: "x86_64"
-  binaries:
-    - "solana-validator"
-  builder: "rust"
-  builder_version: "1.76"
-  cpu: "generic"
-  dockerfile: "jito-solana"
-  dockerfile_binary: "jito-solana"
-  patches: false
-  purpose: "testing"
+# TOOLS

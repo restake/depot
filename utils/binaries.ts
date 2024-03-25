@@ -14,24 +14,7 @@ export const getBinaries = async (repositoryName: string): Promise<Record<string
     const binaries: Record<string, string> = {};
 
     project.binaries.forEach((binary) => {
-        binaries[binary] = `${GITHUB_WORKSPACE}/${project.name}/bin/${binary}-${project.cpu}-${project.architecture}`;
-    });
-
-    return binaries;
-};
-
-export const getBinaryNames = async (repositoryName: string): Promise<Record<string, string>> => {
-    const config = await getConfig(DEPOT_CONFIG_PATH) as DepotProject[];
-    const project = config.find((project) => project.repository === repositoryName);
-
-    if (!project) {
-        throw new Error(`Project ${repositoryName} not found in config file`);
-    }
-
-    const binaries: Record<string, string> = {};
-
-    project.binaries.forEach((binary) => {
-        binaries[binary] = `${binary}-${project.cpu}-${project.architecture}`;
+        binaries[binary] = `${GITHUB_WORKSPACE}/${project.project_name}/bin/${binary}-${project.cpu}-${project.architecture}`;
     });
 
     return binaries;

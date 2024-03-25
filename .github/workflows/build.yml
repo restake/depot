@@ -1,4 +1,4 @@
-name: "Build Binary"
+name: "Automated Builder"
 
 on:
   workflow_dispatch:
@@ -24,18 +24,10 @@ on:
 
 env:
   DEPOT_BINARY_VERSION: "${{ inputs.binary_version || 'v6.4.3' }}"
-  DEPOT_REPOSITORY_NAME: "${{ inputs.repository_name || 'composable-cosmos' }}"
   DEPOT_REPOSITORY_ORG: "${{ inputs.repository_org || 'ComposableFi' }}"
+  DEPOT_REPOSITORY_NAME: "${{ inputs.repository_name || 'composable-cosmos' }}"
   DEPOT_BUCKET_NAME: "depot"
   DEPOT_BUCKET_PUBLIC_URL: "https://depot.r2.restake.cloud"
-  RCLONE_CONFIG_R2_TYPE: "s3"
-  RCLONE_CONFIG_R2_PROVIDER: "Cloudflare"
-  RCLONE_CONFIG_R2_REGION: "auto"
-  RCLONE_CONFIG_R2_ACL: "private"
-  RCLONE_CONFIG_R2_NO_CHECK_BUCKET: "true"
-  RCLONE_CONFIG_R2_ACCESS_KEY_ID: "${{ secrets.R2_ACCESS_KEY_ID }}"
-  RCLONE_CONFIG_R2_SECRET_ACCESS_KEY: "${{ secrets.R2_SECRET_ACCESS_KEY }}"
-  RCLONE_CONFIG_R2_ENDPOINT: "${{ secrets.R2_ENDPOINT}}"
   SLACK_BOT_TOKEN: "${{ secrets.SLACK_BOT_TOKEN }}"
   SLACK_CHANNEL_ID: "C06QF8AKYMV"
 
@@ -44,7 +36,9 @@ jobs:
     name: "Build"
     runs-on: "ubuntu-latest-l"
     outputs:
-      binaries-output: "${{ steps.binaries-output.outputs.binaries }}"
+      depot_binaries: "${{ steps.set-outputs.outputs.depot_binaries }}"
+      depot_purpose: "${{ steps.set-outputs.outputs.depot_purpose }}"
+      depot_project_name: "${{ steps.set-outputs.outputs.depot_project_name }}"
     steps:
       - id: "checkout"
         name: "Checkout code"
@@ -52,7 +46,7 @@ jobs:
 
       - id: "setup-deno"
         name: "Set up Deno"
-        uses: denolib/setup-deno@v2
+        uses: denoland/setup-deno@v1
         with:
           deno-version: 1.41.0
 
@@ -60,9 +54,12 @@ jobs:
         name: "Set up environment variables"
         run: deno run --allow-write --allow-env --allow-read ./utils/env.ts
 
-      - id: "binaries-output"
-        name: "Set DEPOT_BINARIES as output"
-        run: echo "::set-output name=binaries::${{ env.DEPOT_BINARYNAMES }}"
+      - id: "set-outputs"
+        name: "Set outputs to use in other jobs"
+        run: |
+          echo "depot_binaries=${{ env.DEPOT_BINARIES }}" >> $GITHUB_OUTPUT
+          echo "depot_purpose=${{ env.DEPOT_PURPOSE }}" >> $GITHUB_OUTPUT
+          echo "depot_project_name=${{ env.DEPOT_PROJECT_NAME }}" >> $GITHUB_OUTPUT
 
       - id: "setup-builder-packages"
         name: "Install builder packages"
@@ -86,7 +83,7 @@ jobs:
         with:
           repository: "${{ env.DEPOT_REPOSITORY_ORG }}/${{ env.DEPOT_REPOSITORY_NAME }}"
           fetch-tags: true
-          path: "${{ env.DEPOT_NAME }}"
+          path: "${{ env.DEPOT_PROJECT_NAME }}"
           ref: "refs/tags/${{ env.DEPOT_BINARY_VERSION }}"
           submodules: true
 
@@ -96,19 +93,19 @@ jobs:
         run: |
           set -euo pipefail
           shopt -s nullglob
-          cd "${GITHUB_WORKSPACE}/${{ env.DEPOT_NAME }}"
-          git am --3way "${GITHUB_WORKSPACE}/pipeline/patches"/*.patch
+          cd "${GITHUB_WORKSPACE}/${{ env.DEPOT_PROJECT_NAME }}"
+          git am --3way "${GITHUB_WORKSPACE}/patches/${{ env.DEPOT_PROJECT_NAME }}"/*.patch
 
       - id: "build-binaries"
         name: "Run protocol-specific build script"
-        run: bash "./scripts/${{ env.DEPOT_NAME }}/build.sh"
+        run: bash "./scripts/${{ env.DEPOT_PROJECT_NAME }}/build.sh"
 
       - id: "upload-artifacts"
         name: "Save binary to workspace"
-        uses: "actions/upload-artifact@v3"
+        uses: "actions/upload-artifact@v4"
         with:
           name: "binaries"
-          path: "${{ env.DEPOT_BINARIES }}"
+          path: "${{ env.DEPOT_BINARY_PATHS }}"
           if-no-files-found: "error"
           retention-days: 1
 
@@ -117,27 +114,42 @@ jobs:
     needs: "build"
     runs-on: "ubuntu-latest"
     steps:
+      - id: "checkout"
+        name: "Checkout code"
+        uses: actions/checkout@v4
+
       - id: "download-artifacts"
         name: "Download binaries from workspace"
-        uses: "actions/download-artifact@v3"
+        uses: "actions/download-artifact@v4"
         with:
           name: "binaries"
           path: "binaries"
 
       - id: "setup-rclone"
         name: "Set up rclone CLI"
-        run: |
-          curl https://rclone.org/install.sh | sudo bash
+        run: curl https://rclone.org/install.sh | sudo bash
+
+      - id: "setup-rclone-config"
+        name: "Set up rclone config"
+        run: printf "%s" "${{ secrets.R2_CONFIG }}" > rclone.conf
 
       - id: "upload-binary"
-        name: Upload binary to R2 bucket
+        name: "Upload binary to R2 bucket and verify a successful upload"
         run: |
           set -euo pipefail
 
           for file in binaries/*; do
             if [ -f "$file" ]; then
               filename=$(basename "$file")
-              rclone copy "$file" "r2:${{ env.DEPOT_BUCKET_NAME }}/${{ env.DEPOT_PURPOSE }}/${{ env.DEPOT_NAME }}/${{ env.DEPOT_BINARY_VERSION }}/${filename}"
+              directory="${{ needs.build.outputs.depot_purpose }}/${{ needs.build.outputs.depot_project_name }}/${{ env.DEPOT_BINARY_VERSION }}"
+
+              rclone --config="rclone.conf" copy "$file" "r2:${{ env.DEPOT_BUCKET_NAME }}/${directory}"
+
+              status_code=$(curl -sL -w "%{http_code}\\n" "${{ env.DEPOT_BUCKET_PUBLIC_URL }}/${directory}/${filename}" -o /dev/null)
+              if [ "$status_code" -ne 200 ]; then
+                echo "Error: Binary $filename is not downloadable (HTTP status code $status_code)"
+                exit 1
+              fi
             fi
           done
 
@@ -150,19 +162,29 @@ jobs:
       build-status: ${{ needs.build.result }}
       upload-status: ${{ needs.upload.result }}
     steps:
-      - name: Get workflow URL
+      - id: "get-workflow-url"
+        name: Get workflow URL
         run: |
           workflow_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
           echo "WORKFLOW_URL=${workflow_url}" >> "${GITHUB_ENV}"
-          echo "DEPOT_BINARY_NAMES=${{ needs.build.outputs.binaries-output }}" >> "${GITHUB_ENV}"
+          echo "DEPOT_BINARY_NAMES=${{ needs.build.outputs.depot_binaries }}" >> "${GITHUB_ENV}"
 
       - id: "checkout"
         name: "Checkout code"
         uses: actions/checkout@v4
 
-      - id: "slack-notify-success"
-        name: "Notify on Slack upon success"
+      - id: "slack-notify-failure"
+        name: "Notify on Slack upon failure"
+        if: ${{ needs.build.result != 'success' || needs.upload.result != 'success' }}
         uses: slackapi/slack-github-action@v1.25.0
         with:
           channel-id: ${{ env.SLACK_CHANNEL_ID }}
-          payload-file-path: ${{ format('./templates/notify-{0}.json', needs.upload.result) }}
+          payload-file-path: './templates/notify-failure.json'
+
+      - id: "slack-notify-success"
+        name: "Notify on Slack upon success"
+        if: ${{ needs.build.result == 'success' && needs.upload.result == 'success' }}
+        uses: slackapi/slack-github-action@v1.25.0
+        with:
+          channel-id: ${{ env.SLACK_CHANNEL_ID }}
+          payload-file-path: './templates/notify-success.json'

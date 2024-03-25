@@ -1,7 +1,5 @@
+#!/usr/bin/env bash
 set -euo pipefail
-
-repository_path=$(pwd)
-cd "$repository_path"
 
 cd sui
 mkdir bin
@@ -11,8 +9,6 @@ export CARGO_BUILD_RUSTFLAGS="-C target-cpu=znver3"
 export CARGO_INCREMENTAL="0"
 
 cargo build --release --bin sui-node --bin sui
-
-set -x
 
 build_binaries="$(deno run --allow-read --allow-env ../utils/binaries.ts)"
 
