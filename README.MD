@@ -6,15 +6,6 @@ Depot is an automated GitHub Actions workflow that simplifies the process of bui
 
 **Disclaimer: This project is under active development.**
 
-## Supported Protocols
-
-- Jito-Solana
-- Centauri
-- Haqq
-- Sui
-
-_This list is not final, as we are constantly working on adding support for additional protocols._
-
 ## Design and Features
 
 Depot automates the following key tasks:

@@ -6,15 +6,12 @@ on:
       binary_version:
         description: "Specify the version"
         required: true
-        default: "v1.18.22"
       repository_name:
         description: "Specify the repository"
         required: true
-        default: "composable-cosmos"
       repository_org:
         description: "Specify the organization"
         required: true
-        default: "ComposableFi"
   repository_dispatch:
     types:
       - webhook
