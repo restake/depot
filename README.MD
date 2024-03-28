@@ -10,7 +10,6 @@ Depot is an automated GitHub Actions workflow that simplifies the process of bui
 
 Depot automates the following key tasks:
 
-- Fetching information upon a new release from newreleases.io
 - Building binaries for specified protocols
 - Applying patches if necessary
 - Uploading built binaries to an R2 bucket

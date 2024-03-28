@@ -13,5 +13,6 @@ if ! [ -d "${install_dir}" ]; then
 fi
 
 export PATH="${PATH}:${CARGO_HOME}/bin"
+
 echo "PATH=${PATH}" >> "${GITHUB_ENV}"
 echo ">>> $(cargo version)"

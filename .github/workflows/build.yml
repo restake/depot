@@ -165,11 +165,11 @@ jobs:
     needs: ["build", "upload"]
     if: ${{ needs.build.outputs.depot_automatic_builds == 'true' && needs.build.result == 'success' || needs.upload.result == 'success' || needs.build.result != 'success' || needs.upload.result != 'success' }}
     outputs:
-      build-status: ${{ needs.build.result }}
-      upload-status: ${{ needs.upload.result }}
+      build-status: "${{ needs.build.result }}"
+      upload-status: "${{ needs.upload.result }}"
     steps:
       - id: "get-workflow-url"
-        name: Get workflow URL
+        name: "Get workflow URL"
         run: |
           workflow_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
           echo "WORKFLOW_URL=${workflow_url}" >> "${GITHUB_ENV}"
@@ -181,16 +181,16 @@ jobs:
 
       - id: "slack-notify-failure"
         name: "Notify on Slack upon failure"
-        if: ${{ needs.build.result != 'success' || needs.upload.result != 'success' }}
+        if: "${{ needs.build.result != 'success' || needs.upload.result != 'success' }}"
         uses: slackapi/slack-github-action@v1.25.0
         with:
-          channel-id: ${{ env.SLACK_CHANNEL_ID }}
-          payload-file-path: './templates/notify-failure.json'
+          channel-id: "${{ env.SLACK_CHANNEL_ID }}"
+          payload-file-path: "./templates/notify-failure.json"
 
       - id: "slack-notify-success"
         name: "Notify on Slack upon success"
-        if: ${{ needs.build.result == 'success' && needs.upload.result == 'success' }}
+        if: "${{ needs.build.result == 'success' && needs.upload.result == 'success' }}"
         uses: slackapi/slack-github-action@v1.25.0
         with:
-          channel-id: ${{ env.SLACK_CHANNEL_ID }}
-          payload-file-path: './templates/notify-success.json'
+          channel-id: "${{ env.SLACK_CHANNEL_ID }}"
+          payload-file-path: "./templates/notify-success.json"

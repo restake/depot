@@ -15,10 +15,6 @@ indent_size = 2
 max_line_length = 0
 trim_trailing_whitespace = false
 
-[*.{tf,tfvars}]
-indent_size = 2
-indent_style = space
-
 [Makefile]
 tab_width = 2
 indent_style = tab

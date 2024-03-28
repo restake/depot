@@ -29,7 +29,7 @@ const build = async (repositoryName: string): Promise<void> => {
         if (key == "binaries" || key == "automatic_builds") {
             continue;
         } else if (project[key as keyof DepotProject] !== undefined) {
-            await setEnv(`DEPOT_${key.toUpperCase()}`, project[key as keyof DepotProject] || '');
+            await setEnv(`DEPOT_${key.toUpperCase()}`, project[key as keyof DepotProject] || "");
         }
     }
 };

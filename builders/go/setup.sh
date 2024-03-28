@@ -9,5 +9,6 @@ if ! [ -d "${install_dir}" ]; then
 fi
 
 export PATH="${PATH}:${install_dir}/bin"
+
 echo "PATH=${PATH}" >> "${GITHUB_ENV}"
 echo ">>> $(go version)"

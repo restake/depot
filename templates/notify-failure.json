@@ -1,33 +1,33 @@
 {
-    "text":"*Binary build process has failed!* ❌",
-	"blocks": [
-		{
-			"type": "section",
-			"text": {
-				"type": "mrkdwn",
-				"text": "<${{ env.WORKFLOW_URL }}|Binary build process has failed! ❌>"
-			}
-		},
-		{
-			"type": "section",
-			"fields": [
-				{
-					"type": "mrkdwn",
-					"text": "*Organization:*\n${{ env.DEPOT_REPOSITORY_ORG }}"
-				},
-				{
-					"type": "mrkdwn",
-					"text": "*Repository:*\n${{ env.DEPOT_REPOSITORY_NAME }}"
-				},
-				{
-					"type": "mrkdwn",
-					"text": "*Binaries:*\n${{ env.DEPOT_BINARY_NAMES }}"
-				},
-				{
-					"type": "mrkdwn",
-					"text": "*Version:*\n`${{ env.DEPOT_BINARY_VERSION }}`"
-				}
-			]
-		}
-	]
+    "text": "*Binary build process has failed!* ❌",
+    "blocks": [
+        {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": "<${{ env.WORKFLOW_URL }}|Binary build process has failed! ❌>"
+            }
+        },
+        {
+            "type": "section",
+            "fields": [
+                {
+                    "type": "mrkdwn",
+                    "text": "*Organization:*\n${{ env.DEPOT_REPOSITORY_ORG }}"
+                },
+                {
+                    "type": "mrkdwn",
+                    "text": "*Repository:*\n${{ env.DEPOT_REPOSITORY_NAME }}"
+                },
+                {
+                    "type": "mrkdwn",
+                    "text": "*Binaries:*\n${{ env.DEPOT_BINARY_NAMES }}"
+                },
+                {
+                    "type": "mrkdwn",
+                    "text": "*Version:*\n`${{ env.DEPOT_BINARY_VERSION }}`"
+                }
+            ]
+        }
+    ]
 }
