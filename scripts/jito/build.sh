@@ -6,7 +6,7 @@ mkdir bin
 
 export CI_COMMIT=$(git rev-parse HEAD)
 export CARGO_BUILD_TARGET="x86_64-unknown-linux-gnu"
-export CARGO_BUILD_RUSTFLAGS="-C target-cpu=znver4"
+export CARGO_BUILD_RUSTFLAGS="-C target-cpu=${DEPOT_CPU}"
 export CARGO_INCREMENTAL="0"
 
 cargo build --profile release --bin solana-validator

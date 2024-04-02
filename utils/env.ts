@@ -12,13 +12,10 @@ const build = async (repositoryName: string): Promise<void> => {
     }
 
     // Set automatic_builds to true by default
-    let automaticBuilds = true;
-    if (project.automatic_builds !== undefined && !project.automatic_builds) {
-        automaticBuilds = false;
-    }
+    const automaticBuilds = (!project.automatic_builds && project.automatic_builds !== undefined) ?? true;
 
     // Whether to build binaries automatically or not
-    await setEnv(`DEPOT_AUTOMATIC_BUILDS`, automaticBuilds.toString());
+    await setEnv("DEPOT_AUTOMATIC_BUILDS", automaticBuilds.toString());
 
     // The binaries we need to build for given project.
     await setEnv("DEPOT_BINARIES", await getProjectBinaryNames(project));
