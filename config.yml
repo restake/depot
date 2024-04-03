@@ -8,7 +8,7 @@
     - "centaurid"
   builder: "go"
   builder_version: "1.21.5"
-  cpu: "generic"
+  cpu: "amd64"
   patches: false
   purpose: "node"
 
@@ -19,7 +19,7 @@
     - "haqqd"
   builder: "go"
   builder_version: "1.21.5"
-  cpu: "generic"
+  cpu: "amd64"
   patches: true
   purpose: "node"
 
