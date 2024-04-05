@@ -59,8 +59,7 @@ jobs:
 
       - id: "early-exit"
         name: "Early exit"
-        if: |
-          ${{ env.DEPOT_AUTOMATIC_BUILDS == 'false' && github.event_name != 'workflow_dispatch'}}
+        if: "${{ env.DEPOT_AUTOMATIC_BUILDS == 'false' && github.event_name != 'workflow_dispatch'}}"
         run: |
           gh run cancel ${{ github.run_id}}
           gh run watch ${{ github.run_id}}
