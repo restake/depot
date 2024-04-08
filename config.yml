@@ -8,7 +8,7 @@
     - "centaurid"
   builder: "go"
   builder_version: "1.21.5"
-  cpu: "amd64"
+  cpu: "generic"
   patches: false
   purpose: "node"
 
@@ -19,11 +19,11 @@
     - "haqqd"
   builder: "go"
   builder_version: "1.21.5"
-  cpu: "amd64"
+  cpu: "generic"
   patches: true
   purpose: "node"
 
-- repository: "jito"
+- repository: "jito-solana"
   project_name: "jito"
   architecture: "x86_64"
   binaries:
