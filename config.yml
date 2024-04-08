@@ -23,7 +23,7 @@
   patches: true
   purpose: "node"
 
-- repository: "jito"
+- repository: "jito-solana"
   project_name: "jito"
   architecture: "x86_64"
   binaries:
