@@ -23,6 +23,17 @@
   patches: true
   purpose: "node"
 
+- repository: "ssc"
+  project_name: "saga"
+  architecture: "x86_64"
+  binaries:
+    - "sscd"
+  builder: "go"
+  builder_version: "1.21.5"
+  cpu: "generic"
+  patches: false
+  purpose: "node"
+
 - repository: "jito-solana"
   project_name: "jito"
   architecture: "x86_64"
