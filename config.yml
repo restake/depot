@@ -34,6 +34,17 @@
   patches: false
   purpose: "node"
 
+- repository: "solana"
+  project_name: "solana"
+  architecture: "x86_64"
+  binaries:
+    - "solana-validator"
+  builder: "rust"
+  builder_version: "1.75"
+  cpu: "znver3"
+  patches: false
+  purpose: "node"
+
 - repository: "sui"
   project_name: "sui"
   architecture: "x86_64"
