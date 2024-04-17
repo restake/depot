@@ -5,7 +5,6 @@ cd sui
 mkdir bin
 
 export CARGO_BUILD_TARGET="x86_64-unknown-linux-gnu"
-export CARGO_BUILD_RUSTFLAGS="-C target-cpu=${DEPOT_CPU}"
 export CARGO_INCREMENTAL="0"
 
 cargo build --release --bin sui-node --bin sui
