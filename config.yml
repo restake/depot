@@ -1,4 +1,6 @@
 ---
+# For Rust builds possible target optimized CPUs are ["znver3", "znver4"]
+
 # NODES
 - repository: "composable-cosmos"
   automatic_builds: false
@@ -64,7 +66,7 @@
     - "sui-node"
   builder: "rust"
   builder_version: "1.75"
-  cpu: "znver3"
+  cpu: "generic"
   patches: false
   purpose: "node"
 
