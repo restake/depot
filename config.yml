@@ -81,3 +81,14 @@
   cpu: "generic"
   patches: false
   purpose: "tool"
+
+- repository: "tenderduty"
+  project_name: "tenderduty"
+  architecture: "x86_64"
+  binaries:
+    - "tenderduty"
+  builder: "go"
+  builder_version: "1.75"
+  cpu: "generic"
+  patches: false
+  purpose: "tool"
