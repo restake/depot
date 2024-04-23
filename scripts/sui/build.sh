@@ -7,7 +7,7 @@ mkdir bin
 export CARGO_BUILD_TARGET="x86_64-unknown-linux-gnu"
 export CARGO_INCREMENTAL="0"
 
-cargo build --release --bin sui-node --bin sui
+cargo build --release --bin sui-node --bin sui --bin sui-tool
 
 build_binaries="$(deno run --allow-read --allow-env ../utils/binaries.ts)"
 
