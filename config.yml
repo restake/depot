@@ -14,6 +14,17 @@
   patches: false
   purpose: "node"
 
+- repository: "dymension"
+  project_name: "dymension"
+  architecture: "x86_64"
+  binaries:
+    - "dymd"
+  builder: "go"
+  builder_version: "1.21.5"
+  cpu: "generic"
+  patches: false
+  purpose: "node"
+
 - repository: "haqq"
   project_name: "haqq"
   architecture: "x86_64"
