@@ -64,6 +64,7 @@
   binaries:
     - "sui"
     - "sui-node"
+    - "sui-tool"
   builder: "rust"
   builder_version: "1.75"
   cpu: "generic"
