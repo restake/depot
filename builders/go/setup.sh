@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-install_dir="${GITHUB_WORKSPACE}/tools/go"
+install_dir="${GITHUB_WORKSPACE}/tools/go-${DEPOT_BUILDER_VERSION}"
 
 if ! [ -d "${install_dir}" ]; then
     mkdir -p "${install_dir}"
