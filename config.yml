@@ -25,6 +25,17 @@
   patches: false
   purpose: "node"
 
+- repository: "node"
+  project_name: "zeta"
+  architecture: "x86_64"
+  binaries:
+    - "zetacored"
+  builder: "go"
+  builder_version: "1.21.5"
+  cpu: "generic"
+  patches: true
+  purpose: "node"
+
 - repository: "haqq"
   project_name: "haqq"
   architecture: "x86_64"

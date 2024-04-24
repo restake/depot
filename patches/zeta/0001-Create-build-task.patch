@@ -1,0 +1,26 @@
+From 6c185868f1d86a96b57f2b23a520dce62224914f Mon Sep 17 00:00:00 2001
+From: Mark Vainomaa <mikroskeem@mikroskeem.eu>
+Date: Thu, 28 Dec 2023 13:18:03 +0200
+Subject: [PATCH] Create build task
+
+---
+ Makefile | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/Makefile b/Makefile
+index bf95f400..86304f5b 100644
+--- a/Makefile
++++ b/Makefile
+@@ -86,6 +86,10 @@ install: go.sum
+ 		@go install -mod=readonly $(BUILD_FLAGS) ./cmd/zetacored
+ 		@go install -mod=readonly $(BUILD_FLAGS) ./cmd/zetaclientd
+
++build: go.mod
++		go build -mod=readonly $(BUILD_FLAGS) -o bin/zetacored ./cmd/zetacored
++		go build -mod=readonly $(BUILD_FLAGS) -o bin/zetaclientd ./cmd/zetaclientd
++
+ install-zetaclient: go.sum
+ 		@echo "--> Installing zetaclientd"
+ 		@go install -mod=readonly $(BUILD_FLAGS) ./cmd/zetaclientd
+--
+2.42.0
