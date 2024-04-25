@@ -83,7 +83,7 @@ jobs:
         run: bash ./builders/${{ env.DEPOT_BUILDER }}/setup.sh
 
       - id: "clone"
-        name: "Clone Protocol source"
+        name: "Clone protocol source"
         uses: "actions/checkout@v4"
         with:
           repository: "${{ env.DEPOT_REPOSITORY_ORG }}/${{ env.DEPOT_REPOSITORY_NAME }}"
