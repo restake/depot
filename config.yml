@@ -93,6 +93,28 @@
   patches: false
   purpose: "node"
 
+- repository: "bsp-agent"
+  project_name: "bsp-agent"
+  architecture: "x86_64"
+  binaries:
+    - "bspagent"
+  builder: "go"
+  builder_version: "1.21.5"
+  cpu: "generic"
+  patches: false
+  purpose: "node"
+
+- repository: "bsp-geth"
+  project_name: "bsp-geth"
+  architecture: "x86_64"
+  binaries:
+    - "geth"
+  builder: "go"
+  builder_version: "1.21.5"
+  cpu: "generic"
+  patches: false
+  purpose: "node"
+
 # TOOLS
 - repository: "tmkms"
   project_name: "tmkms"

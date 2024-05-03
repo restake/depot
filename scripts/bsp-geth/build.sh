@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cd bsp-geth
+mkdir bin
+
+make geth
+
+build_binaries="$(deno run --allow-read --allow-env ../utils/binaries.ts)"
+
+echo "${build_binaries}" | jq -r 'to_entries[] | "\(.key) \(.value)"' | while read -r binary path; do
+    mv -v "${GITHUB_WORKSPACE}/bsp-geth/build/bin/${binary}" "${path}"
+done
