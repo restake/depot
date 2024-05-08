@@ -1,0 +1,38 @@
+name: "R2 Listing"
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'ui/**'
+
+env:
+  CF_API_TOKEN: "${{ secrets.CF_API_TOKEN }}"
+  CF_ACCOUNT_ID: "${{ secrets.CF_ACCOUNT_ID }}"
+
+jobs:
+  deploy:
+    name: "Deploy"
+    runs-on: "ubuntu-latest"
+    steps:
+      - id: "checkout"
+        name: "Checkout code"
+        uses: actions/checkout@v4
+
+      - id: "setup-deno"
+        name: "Set up Deno"
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: 1.41.0
+
+      - id: "setup-denoflare"
+        name: "Set up Denoflare"
+        run: |
+          deno install --unstable-worker-options --allow-read --allow-net --allow-env --allow-run --name denoflare --force \
+          https://raw.githubusercontent.com/skymethod/denoflare/v0.6.0/cli/cli.ts
+
+      - id: "deploy-ui"
+        name: "Deploy Depot UI"
+        run: |
+          denoflare push depot-ui --config ./ui/.denoflare.jsonc

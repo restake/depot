@@ -1,0 +1,12 @@
+export type {
+    IncomingRequestCf,
+    R2Bucket,
+    R2Conditional,
+    R2GetOptions,
+    R2ListOptions,
+    R2Object,
+    R2ObjectBody,
+    R2Objects,
+    R2Range,
+} from "https://raw.githubusercontent.com/skymethod/denoflare/v0.6.0/common/cloudflare_workers_types.d.ts";
+export { encodeXml } from "https://raw.githubusercontent.com/skymethod/denoflare/v0.6.0/common/xml_util.ts";
