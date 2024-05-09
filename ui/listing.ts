@@ -19,12 +19,18 @@ export function computeDirectoryListingHtml(
         lines.push('<div class="full">&nbsp;</div>');
     }
     for (const obj of objects.objects) {
+        const formattedDate = obj.uploaded.toLocaleString("en-GB", {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+        });
         lines.push(
-            `<a href="${encodeXml("/" + obj.key)}">${
-                encodeXml(obj.key.substring(prefix.length))
-            }</a><div class="ralign">${obj.size.toLocaleString()}</div><div class="ralign">${
-                computeBytesString(obj.size)
-            }</div><div>${obj.uploaded.toISOString()}</div>`,
+            `<div><a href="${encodeXml("/" + obj.key)}">${encodeXml(obj.key.substring(prefix.length))}</a></div>
+            <div>${obj.size.toLocaleString()}</div>
+            <div>${computeBytesString(obj.size)}</div>
+            <div>${formattedDate}</div>`,
         );
     }
     if (cursor) {
@@ -44,11 +50,11 @@ export function computeDirectoryListingHtml(
 //
 
 const STYLE = `
-body { margin: 3rem; font-family: sans-serif; }
+body { margin: 3rem; font-family: sans-serif; max-width: 30%; }
 a { text-decoration: none; text-underline-offset: 0.2rem; }
 a:hover { text-decoration: underline; }
 .ralign { text-align: right; }
-#contents { display: grid; grid-template-columns: 1fr 6rem auto auto; gap: 0.5rem 1.5rem; white-space: nowrap; }
+#contents { display: grid; grid-template-columns: 1fr auto auto auto; gap: 0.5rem 1.5rem; white-space: nowrap; }
 #contents .full { grid-column: 1 / span 4; }
 
 @media (prefers-color-scheme: dark) {

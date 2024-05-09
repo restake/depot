@@ -6,6 +6,9 @@ on:
       - master
     paths:
       - 'ui/**'
+  pull_request:
+    branches:
+      - master
 
 env:
   CF_API_TOKEN: "${{ secrets.CF_API_TOKEN }}"
