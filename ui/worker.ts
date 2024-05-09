@@ -1,5 +1,5 @@
 import { IncomingRequestCf, R2Conditional, R2GetOptions, R2ListOptions, R2Object, R2ObjectBody, R2Range } from "./deps.ts";
-import { computeDirectoryListingHtml } from "./listing.ts";
+import { computeDirectoryListingHtml } from "./listing.tsx";
 import { WorkerEnv } from "./worker_env.d.ts";
 
 export default {
