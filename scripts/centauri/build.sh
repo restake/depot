@@ -3,10 +3,14 @@ set -euo pipefail
 
 cd centauri
 
+arch="$(uname -m)"
+
 # Grab static libwasmvm
-wasmvm_version="$(go list -json -m all | jq -cr 'select(.Path == "github.com/CosmWasm/wasmvm") | .Replace.Version // .Version')"
-curl -JLO "https://github.com/CosmWasm/wasmvm/releases/download/${wasmvm_version}/libwasmvm_muslc.x86_64.a"
-ln -s libwasmvm_muslc.x86_64.a libwasmvm.x86_64.a
+if ! [ -f "libwasmvm_muslc.${arch}.a" ]; then
+    wasmvm_version="$(go list -json -m all | jq -cr 'select(.Path == "github.com/CosmWasm/wasmvm") | .Replace.Version // .Version')"
+    curl -JL -o "libwasmvm_muslc.${arch}.a" "https://github.com/CosmWasm/wasmvm/releases/download/${wasmvm_version}/libwasmvm_muslc.${arch}.a"
+    ln -s "libwasmvm_muslc.${arch}.a" "libwasmvm.${arch}.a"
+fi
 
 make CC="x86_64-linux-musl-gcc" CGO_LDFLAGS="-L." LEDGER_ENABLED=false LINK_STATICALLY=true build
 
