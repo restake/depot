@@ -1,0 +1,15 @@
+{
+    // For auto-completion!
+    "$schema": "https://raw.githubusercontent.com/skymethod/denoflare/v0.6.0/common/config.schema.json",
+    "scripts": {
+        "depot-ui": {
+            "path": "./ui/worker.ts",
+            "bindings": {
+                "bucket": { "bucketName": "depot" },
+                "flags": { "value": "listDirectories" },
+                "allowCorsOrigins": { "value": "*" }
+            },
+            "customDomains": ["depot.restake.cloud"]
+        }
+    }
+}
