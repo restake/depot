@@ -7,7 +7,7 @@
   project_name: "centauri"
   architecture: "x86_64"
   binaries:
-    - "centaurid"
+    - "picad"
   builder: "go"
   builder_version: "1.21.5"
   cpu: "generic"
