@@ -4,7 +4,7 @@ set -euo pipefail
 cd centauri
 
 # Grab static libwasmvm
-wasmvm_version="$(go list -m all | grep -F "github.com/CosmWasm/wasmvm" | awk '{print $2}')"
+wasmvm_version="$(go list -json -m all | jq -cer 'select(.Path == "github.com/CosmWasm/wasmvm") | .Replace.Version // .Version')"
 curl -JLO "https://github.com/CosmWasm/wasmvm/releases/download/${wasmvm_version}/libwasmvm_muslc.x86_64.a"
 ln -s libwasmvm_muslc.x86_64.a libwasmvm.x86_64.a
 
