@@ -12,7 +12,13 @@ if ! [ -f "libwasmvm_muslc.${arch}.a" ]; then
     ln -s "libwasmvm_muslc.${arch}.a" "libwasmvm.${arch}.a"
 fi
 
-make CC="x86_64-linux-musl-gcc" CGO_LDFLAGS="-L." LEDGER_ENABLED=false LINK_STATICALLY=true build
+TARGET="${arch}-linux-gnu"
+export CC="zig cc -target ${TARGET}"
+export CXX="zig c++ -target ${TARGET}"
+export CGO_ENABLED="1"
+export CGO_LDFLAGS="-L. -Bsystem -lc -lm -lunwind -Bstatic"
+
+make LEDGER_ENABLED=false LINK_STATICALLY=true build
 
 # Smoke test
 ldd ./bin/picad || :
