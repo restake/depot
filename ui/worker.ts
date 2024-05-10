@@ -2,6 +2,8 @@ import { IncomingRequestCf, R2Conditional, R2GetOptions, R2ListOptions, R2Object
 import { computeDirectoryListingHtml } from "./listing.tsx";
 import { WorkerEnv } from "./worker_env.d.ts";
 
+// Based on https://github.com/skymethod/denoflare/tree/v0.6.0/examples/r2-public-read-worker
+
 export default {
     async fetch(request: IncomingRequestCf, env: WorkerEnv): Promise<Response> {
         try {
