@@ -11,7 +11,7 @@
   builder: "go"
   builder_version: "1.21.5"
   cpu: "generic"
-  patches: false
+  patches: true
   purpose: "node"
 
 - repository: "dymension"
