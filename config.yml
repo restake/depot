@@ -137,3 +137,14 @@
   cpu: "generic"
   patches: false
   purpose: "tool"
+
+- repository: "ipfs-pinner"
+  project_name: "ipfs-pinner"
+  architecture: "x86_64"
+  binaries:
+    - "server"
+  builder: "go"
+  builder_version: "1.20.13"
+  cpu: "generic"
+  patches: false
+  purpose: "tool"
