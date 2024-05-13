@@ -13,5 +13,5 @@ make CC="x86_64-linux-musl-gcc" CGO_LDFLAGS="-L." LEDGER_ENABLED=false LINK_STAT
 build_binaries="$(deno run --allow-read --allow-env ../utils/binaries.ts)"
 
 echo "${build_binaries}" | jq -r 'to_entries[] | "\(.key) \(.value)"' | while read -r binary path; do
-    mv -v "${GITHUB_WORKSPACE}/babylon/bin/${binary}" "${path}"
+    mv -v "${GITHUB_WORKSPACE}/babylon/build/${binary}" "${path}"
 done
