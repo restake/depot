@@ -105,12 +105,18 @@ jobs:
         name: "Run protocol-specific build script"
         run: bash "./scripts/${{ env.DEPOT_PROJECT_NAME }}/build.sh"
 
+      - id: "generate-checksum"
+        name: "Generate checksum file"
+        run: |
+          cd ${{ env.DEPOT_PROJECT_NAME }}/bin
+          sha256sum * > SHA256SUMS
+
       - id: "upload-artifacts"
         name: "Save binary to workspace"
         uses: "actions/upload-artifact@v4"
         with:
           name: "binaries"
-          path: "${{ env.DEPOT_BINARY_PATHS }}"
+          path: "${{ env.DEPOT_PROJECT_NAME }}/bin/*"
           if-no-files-found: "error"
           retention-days: 1
 
