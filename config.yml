@@ -2,6 +2,30 @@
 # For Rust builds possible target optimized CPUs are ["znver3", "znver4"]
 
 # NODES
+- repository: "babylon"
+  project_name: "babylon"
+  architecture: "x86_64"
+  binaries:
+    - "babylond"
+  builder: "go"
+  builder_version: "1.21.5"
+  cpu: "generic"
+  patches: false
+  purpose: "node"
+
+- repository: "finality-provider"
+  project_name: "babylon-fp"
+  architecture: "x86_64"
+  binaries:
+    - "eotsd"
+    - "fpd"
+    - "fpcli"
+  builder: "go"
+  builder_version: "1.21.5"
+  cpu: "generic"
+  patches: false
+  purpose: "tool"
+
 - repository: "composable-cosmos"
   automatic_builds: false
   project_name: "centauri"
