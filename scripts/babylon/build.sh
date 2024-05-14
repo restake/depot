@@ -2,6 +2,7 @@
 set -euo pipefail
 
 cd babylon
+mkdir bin
 
 # Grab static libwasmvm
 wasmvm_version="$(go list -m all | grep -F "github.com/CosmWasm/wasmvm" | awk '{print $2}')"
