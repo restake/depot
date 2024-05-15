@@ -174,7 +174,7 @@
   purpose: "tool"
 
 - repository: "composable"
-  project_name: "picasso-pf"
+  project_name: "picasso-price-feed"
   architecture: "x86_64"
   binaries:
     - "price-feed"

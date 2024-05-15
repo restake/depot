@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-cd tmkms
+cd "${DEPOT_PROJECT_NAME}"
 mkdir bin
 
 cargo build --release --features=softsign,fortanixdsm

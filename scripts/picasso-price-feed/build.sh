@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-cd picasso-pf
+cd "${DEPOT_PROJECT_NAME}"
 mkdir bin
 
 cargo build --release --package price-feed

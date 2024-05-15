@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-cd bsp-agent
+cd "${DEPOT_PROJECT_NAME}"
 mkdir bin
 
 make build

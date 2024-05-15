@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-cd jito
+cd "${DEPOT_PROJECT_NAME}"
 mkdir bin
 
 export CI_COMMIT=$(git rev-parse HEAD)
