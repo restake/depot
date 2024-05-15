@@ -172,3 +172,14 @@
   cpu: "generic"
   patches: false
   purpose: "tool"
+
+- repository: "composable"
+  project_name: "picasso-price-feed"
+  architecture: "x86_64"
+  binaries:
+    - "price-feed"
+  builder: "rust"
+  builder_version: "1.70"
+  cpu: "generic"
+  patches: false
+  purpose: "tool"

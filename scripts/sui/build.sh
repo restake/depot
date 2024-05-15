@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-cd sui
+cd "${DEPOT_PROJECT_NAME}"
 mkdir bin
 
 export CARGO_BUILD_TARGET="x86_64-unknown-linux-gnu"

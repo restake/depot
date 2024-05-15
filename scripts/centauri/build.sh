@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-cd centauri
+cd "${DEPOT_PROJECT_NAME}"
 
 # Grab static libwasmvm
 wasmvm_version="$(go list -json -m all | jq -cer 'select(.Path == "github.com/CosmWasm/wasmvm") | .Replace.Version // .Version')"

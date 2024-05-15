@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-cd tenderduty
+cd "${DEPOT_PROJECT_NAME}"
 mkdir bin
 
 go get ./...

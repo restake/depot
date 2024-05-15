@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-cd haqq
+cd "${DEPOT_PROJECT_NAME}"
 mkdir bin
 
 make LEDGER_ENABLED=false build

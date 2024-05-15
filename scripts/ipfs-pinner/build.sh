@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-cd ipfs-pinner
+cd "${DEPOT_PROJECT_NAME}"
 mkdir bin
 
 make clean server-dbg
