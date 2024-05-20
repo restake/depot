@@ -15,14 +15,11 @@ on:
   repository_dispatch:
     types:
       - webhook
-  pull_request:
-    branches:
-      - master
 
 env:
-  DEPOT_BINARY_VERSION: "${{ inputs.binary_version || 'v1.18.14' }}"
-  DEPOT_REPOSITORY_ORG: "${{ inputs.repository_org  || 'solana-labs' }}"
-  DEPOT_REPOSITORY_NAME: "${{ inputs.repository_name || 'solana' }}"
+  DEPOT_BINARY_VERSION: "${{ inputs.binary_version }}"
+  DEPOT_REPOSITORY_ORG: "${{ inputs.repository_org }}"
+  DEPOT_REPOSITORY_NAME: "${{ inputs.repository_name }}"
   DEPOT_BUCKET_NAME: "depot"
   DEPOT_BUCKET_PUBLIC_URL: "https://depot.r2.restake.cloud"
   SLACK_BOT_TOKEN: "${{ secrets.SLACK_BOT_TOKEN }}"

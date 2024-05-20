@@ -12,15 +12,13 @@ export CARGO_INCREMENTAL="0"
 # Replace literal '\n' with actual newlines for proper splitting
 binaries=$(echo -e "$DEPOT_BINARY_BUILD_NAME")
 
-cmd="cargo build --profile release"
+args=()
 
 while IFS= read -r binary; do
-    cmd+=" --bin $binary"
+    args+=(--bin "${binary}")
 done <<< "$binaries"
 
-echo "Executing: $cmd"
-
-eval $cmd
+cargo build --profile release "${args[@]}"
 
 build_binaries="$(deno run --allow-read --allow-env ../utils/binaries.ts)"
 
