@@ -9,7 +9,18 @@ export CARGO_BUILD_TARGET="x86_64-unknown-linux-gnu"
 export CARGO_BUILD_RUSTFLAGS="-C target-cpu=${DEPOT_CPU}"
 export CARGO_INCREMENTAL="0"
 
-cargo build --profile release --bin solana-validator
+# Replace literal '\n' with actual newlines for proper splitting
+binaries=$(echo -e "$DEPOT_BINARY_BUILD_NAME")
+
+cmd="cargo build --profile release"
+
+while IFS= read -r binary; do
+    cmd+=" --bin $binary"
+done <<< "$binaries"
+
+echo "Executing: $cmd"
+
+eval $cmd
 
 build_binaries="$(deno run --allow-read --allow-env ../utils/binaries.ts)"
 
