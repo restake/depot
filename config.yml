@@ -188,3 +188,15 @@
   cpu: "generic"
   patches: false
   purpose: "tool"
+
+- repository: "btc-staker"
+  project_name: "babylon-btc-staker"
+  architecture: "x86_64"
+  binaries:
+    - "stakerd"
+    - "stakercli"
+  builder: "go"
+  builder_version: "1.21.5"
+  cpu: "generic"
+  patches: false
+  purpose: "tool"

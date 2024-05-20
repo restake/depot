@@ -15,11 +15,14 @@ on:
   repository_dispatch:
     types:
       - webhook
+  pull_request:
+    branches:
+      - master
 
 env:
-  DEPOT_BINARY_VERSION: "${{ inputs.binary_version }}"
-  DEPOT_REPOSITORY_ORG: "${{ inputs.repository_org }}"
-  DEPOT_REPOSITORY_NAME: "${{ inputs.repository_name }}"
+  DEPOT_BINARY_VERSION: "${{ inputs.binary_version || 'v0.2.0' }}"
+  DEPOT_REPOSITORY_ORG: "${{ inputs.repository_org || 'babylonchain' }}"
+  DEPOT_REPOSITORY_NAME: "${{ inputs.repository_name || 'btc-staker' }}"
   DEPOT_BUCKET_NAME: "depot"
   DEPOT_BUCKET_PUBLIC_URL: "https://depot.r2.restake.cloud"
   SLACK_BOT_TOKEN: "${{ secrets.SLACK_BOT_TOKEN }}"
