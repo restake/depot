@@ -18,8 +18,9 @@ const build = async (repositoryName: string): Promise<void> => {
     await setEnv("DEPOT_AUTOMATIC_BUILDS", automaticBuilds.toString());
 
     // The binaries we need to build for given project.
-    await setEnv("DEPOT_BINARIES", await getProjectBinaryNames(project));
-    await setEnv("DEPOT_BINARY_PATHS", await getProjectBinaryNames(project, true));
+    await setEnv("DEPOT_BINARIES", await getProjectBinaryNames(project, "name"));
+    await setEnv("DEPOT_BINARY_PATHS", await getProjectBinaryNames(project, "path"));
+    await setEnv("DEPOT_BINARY_BUILD_NAME", await getProjectBinaryNames(project, "build"));
 
     for (const key in project) {
         // Binaries and automatic_builds are a special case, we have already set these.
@@ -47,13 +48,15 @@ const setEnv = async (key: string, value: string | string[] | boolean): Promise<
     }
 };
 
-const getProjectBinaryNames = async (project: DepotProject, withFullpath: boolean = false): Promise<string> => {
+const getProjectBinaryNames = async (project: DepotProject, target: string): Promise<string> => {
     const binaries = await getBinaries(project.repository);
     return project.binaries.map((binary) => {
-        if (!withFullpath) {
+        if (target == "name") {
             return binaries[binary].split("/").pop();
-        } else {
+        } else if (target == "path") {
             return binaries[binary];
+        } else if (target == "build") {
+            return binary;
         }
     }).join("\n");
 };

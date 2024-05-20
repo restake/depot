@@ -98,6 +98,11 @@
   architecture: "x86_64"
   binaries:
     - "solana-validator"
+    - "solana-watchtower"
+    - "solana"
+    - "solana-ledger-tool"
+    - "solana-gossip"
+    - "solana-genesis"
   builder: "rust"
   builder_version: "1.75"
   cpu: "znver3"
