@@ -103,6 +103,7 @@
     - "solana-ledger-tool"
     - "solana-gossip"
     - "solana-genesis"
+    - "solana-keygen"
   builder: "rust"
   builder_version: "1.75"
   cpu: "znver3"
