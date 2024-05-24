@@ -117,6 +117,7 @@
     - "sui"
     - "sui-node"
     - "sui-tool"
+    - "sui-bridge-cli"
   builder: "rust"
   builder_version: "1.75"
   cpu: "generic"
