@@ -54,6 +54,7 @@
   architecture: "x86_64"
   binaries:
     - "zetacored"
+    - "zetaclientd"
   builder: "go"
   builder_version: "1.20"
   cpu: "generic"
