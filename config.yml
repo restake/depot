@@ -28,10 +28,12 @@
 
 - repository: "composable-cosmos"
   automatic_builds: false
+  image_builds: true
   project_name: "centauri"
   architecture: "x86_64"
   binaries:
     - "picad"
+  docker_image: "picad"
   builder: "go"
   builder_version: "1.21.5"
   cpu: "generic"

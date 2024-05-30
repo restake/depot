@@ -34,6 +34,8 @@ jobs:
       depot_purpose: "${{ steps.set-outputs.outputs.depot_purpose }}"
       depot_project_name: "${{ steps.set-outputs.outputs.depot_project_name }}"
       depot_automatic_builds: "${{ steps.set-outputs.outputs.depot_automatic_builds }}"
+      depot_image_builds: "${{ steps.set-outputs.outputs.depot_image_builds }}"
+      depot_docker_image: "${{ steps.set-outputs.outputs.depot_docker_image }}"
     steps:
       - id: "checkout"
         name: "Checkout code"
@@ -53,8 +55,10 @@ jobs:
         name: "Set outputs to use in other jobs"
         run: |
           echo "depot_automatic_builds=${{ env.DEPOT_AUTOMATIC_BUILDS }}" >> $GITHUB_OUTPUT
+          echo "depot_image_builds=${{ env.DEPOT_IMAGE_BUILDS }}" >> $GITHUB_OUTPUT
           echo "depot_purpose=${{ env.DEPOT_PURPOSE }}" >> $GITHUB_OUTPUT
           echo "depot_project_name=${{ env.DEPOT_PROJECT_NAME }}" >> $GITHUB_OUTPUT
+          echo "depot_docker_image=${{ env.DEPOT_DOCKER_IMAGE }}" >> $GITHUB_OUTPUT
           printf "depot_binaries=%s" "${DEPOT_BINARIES//$'\n'/\\n}" >> $GITHUB_OUTPUT
 
       - id: "early-exit"
@@ -120,83 +124,135 @@ jobs:
           if-no-files-found: "error"
           retention-days: 1
 
-  upload:
-    name: "Upload"
-    needs: "build"
-    runs-on: "ubuntu-latest"
-    if: ${{ needs.build.outputs.depot_automatic_builds == 'true' }}
-    steps:
-      - id: "checkout"
-        name: "Checkout code"
-        uses: actions/checkout@v4
+  # upload:
+  #   name: "Upload"
+  #   needs: "build"
+  #   runs-on: "ubuntu-latest"
+  #   if: ${{ needs.build.outputs.depot_automatic_builds == 'true' }}
+  #   steps:
+  #     - id: "checkout"
+  #       name: "Checkout code"
+  #       uses: actions/checkout@v4
 
-      - id: "download-artifacts"
-        name: "Download binaries from workspace"
-        uses: "actions/download-artifact@v4"
-        with:
-          name: "binaries"
-          path: "binaries"
+  #     - id: "download-artifacts"
+  #       name: "Download binaries from workspace"
+  #       uses: "actions/download-artifact@v4"
+  #       with:
+  #         name: "binaries"
+  #         path: "binaries"
 
-      - id: "setup-rclone"
-        name: "Set up rclone CLI"
-        run: curl https://rclone.org/install.sh | sudo bash
+  #     - id: "setup-rclone"
+  #       name: "Set up rclone CLI"
+  #       run: curl https://rclone.org/install.sh | sudo bash
 
-      - id: "setup-rclone-config"
-        name: "Set up rclone config"
-        run: printf "%s" "${{ secrets.R2_CONFIG }}" > rclone.conf
+  #     - id: "setup-rclone-config"
+  #       name: "Set up rclone config"
+  #       run: printf "%s" "${{ secrets.R2_CONFIG }}" > rclone.conf
 
-      - id: "upload-binary"
-        name: "Upload binary to R2 bucket and verify a successful upload"
-        run: |
-          set -euo pipefail
+  #     - id: "upload-binary"
+  #       name: "Upload binary to R2 bucket and verify a successful upload"
+  #       run: |
+  #         set -euo pipefail
 
-          for file in binaries/*; do
-            if [ -f "$file" ]; then
-              filename=$(basename "$file")
-              directory="${{ needs.build.outputs.depot_purpose }}/${{ needs.build.outputs.depot_project_name }}/${{ env.DEPOT_BINARY_VERSION }}"
+  #         for file in binaries/*; do
+  #           if [ -f "$file" ]; then
+  #             filename=$(basename "$file")
+  #             directory="${{ needs.build.outputs.depot_purpose }}/${{ needs.build.outputs.depot_project_name }}/${{ env.DEPOT_BINARY_VERSION }}"
 
-              rclone --config="rclone.conf" copy "$file" "r2:${{ env.DEPOT_BUCKET_NAME }}/${directory}"
+  #             rclone --config="rclone.conf" copy "$file" "r2:${{ env.DEPOT_BUCKET_NAME }}/${directory}"
 
-              status_code=$(curl -sL -w "%{http_code}\\n" "${{ env.DEPOT_BUCKET_PUBLIC_URL }}/${directory}/${filename}" -o /dev/null)
-              if [ "$status_code" -ne 200 ]; then
-                echo "Error: Binary $filename is not downloadable (HTTP status code $status_code)"
-                exit 1
-              fi
-            fi
-          done
+  #             status_code=$(curl -sL -w "%{http_code}\\n" "${{ env.DEPOT_BUCKET_PUBLIC_URL }}/${directory}/${filename}" -o /dev/null)
+  #             if [ "$status_code" -ne 200 ]; then
+  #               echo "Error: Binary $filename is not downloadable (HTTP status code $status_code)"
+  #               exit 1
+  #             fi
+  #           fi
+  #         done
 
-  notify:
-    name: "Notify on Slack"
-    runs-on: "ubuntu-latest"
-    needs: ["build", "upload"]
-    if: ${{ needs.build.outputs.depot_automatic_builds == 'true' && needs.build.result == 'success' || needs.upload.result == 'success' || needs.build.result != 'success' || needs.upload.result != 'success' }}
+  build-docker:
+    runs-on: ubuntu-latest
+    needs: ["build"]
+    if: ${{ needs.build.outputs.depot_image_builds == 'true' && needs.build.result == 'success' }}
     outputs:
       build-status: "${{ needs.build.result }}"
-      upload-status: "${{ needs.upload.result }}"
+      image-name: "${{ needs.build.outputs.depot_docker_image }}"
+      image-builds: "${{ needs.build.outputs.depot_image_builds }}"
     steps:
-      - id: "get-workflow-url"
-        name: "Get workflow URL"
-        run: |
-          workflow_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
-          echo "WORKFLOW_URL=${workflow_url}" >> "${GITHUB_ENV}"
-          echo "DEPOT_BINARY_NAMES=${{ needs.build.outputs.depot_binaries }}" >> "${GITHUB_ENV}"
+      - name: "Checkout repository"
+        uses: actions/checkout@v2
 
-      - id: "checkout"
-        name: "Checkout code"
-        uses: actions/checkout@v4
-
-      - id: "slack-notify-failure"
-        name: "Notify on Slack upon failure"
-        if: "${{ needs.build.result != 'success' || needs.upload.result != 'success' }}"
-        uses: slackapi/slack-github-action@v1.25.0
+      - name: "Download binary artifact"
+        uses: actions/download-artifact@v2
         with:
-          channel-id: "${{ env.SLACK_CHANNEL_ID }}"
-          payload-file-path: "./templates/notify-failure.json"
+          name: binary
+          path: binary
 
-      - id: "slack-notify-success"
-        name: "Notify on Slack upon success"
-        if: "${{ needs.build.result == 'success' && needs.upload.result == 'success' }}"
-        uses: slackapi/slack-github-action@v1.25.0
+      - id: "login-ghcr"
+        name: "Log in to the Container registry"
+        uses: "docker/login-action@v3.1.0"
         with:
-          channel-id: "${{ env.SLACK_CHANNEL_ID }}"
-          payload-file-path: "./templates/notify-success.json"
+          registry: "${{ env.DOCKER_REGISTRY }}"
+          username: "restake-bot"
+          password: "${{ secrets.RESTAKE_BOT_TOKEN }}"
+
+      - name: "Build Docker image"
+        id: "build_docker"
+        run: bash "./scripts/build_docker.sh"
+
+      - id: "publish-images"
+        name: "Load and publish images to GHCR"
+        run: |-
+          set -euo pipefail
+
+          github_tag="${GITHUB_REF#refs/tags/}"
+          image_name="${{ env.DOCKER_REGISTRY }}/${{ env.GITHUB_ORG }}/${{ env.DEPOT_DOCKER_IMAGE }}"
+          built_tags=()
+
+          for file in archives/*/*; do
+            image_sha=$(docker load -i "${file}" | grep -o "${{ env.DEPOT_DOCKER_IMAGE }}:[a-f0-9]*")
+            image_arch=$(docker image inspect "${image_sha}" | jq -cer '.[].Architecture')
+            image_tag="${image_name}:${github_tag}-${image_arch}"
+            docker tag "${image_sha}" "${image_tag}"
+            built_tags+=("${image_tag}")
+            docker push "${image_tag}"
+            docker image rm "${image_sha}"
+          done
+
+          docker manifest create "${image_name}:${github_tag}" "${built_tags[@]}"
+          docker manifest push "${image_name}:${github_tag}"
+
+  # notify:
+  #   name: "Notify on Slack"
+  #   runs-on: "ubuntu-latest"
+  #   needs: ["build", "upload"]
+  #   if: ${{ needs.build.outputs.depot_automatic_builds == 'true' && needs.build.result == 'success' || needs.upload.result == 'success' || needs.build.result != 'success' || needs.upload.result != 'success' }}
+  #   outputs:
+  #     build-status: "${{ needs.build.result }}"
+  #     upload-status: "${{ needs.upload.result }}"
+  #   steps:
+  #     - id: "get-workflow-url"
+  #       name: "Get workflow URL"
+  #       run: |
+  #         workflow_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+  #         echo "WORKFLOW_URL=${workflow_url}" >> "${GITHUB_ENV}"
+  #         echo "DEPOT_BINARY_NAMES=${{ needs.build.outputs.depot_binaries }}" >> "${GITHUB_ENV}"
+
+  #     - id: "checkout"
+  #       name: "Checkout code"
+  #       uses: actions/checkout@v4
+
+  #     - id: "slack-notify-failure"
+  #       name: "Notify on Slack upon failure"
+  #       if: "${{ needs.build.result != 'success' || needs.upload.result != 'success' }}"
+  #       uses: slackapi/slack-github-action@v1.25.0
+  #       with:
+  #         channel-id: "${{ env.SLACK_CHANNEL_ID }}"
+  #         payload-file-path: "./templates/notify-failure.json"
+
+  #     - id: "slack-notify-success"
+  #       name: "Notify on Slack upon success"
+  #       if: "${{ needs.build.result == 'success' && needs.upload.result == 'success' }}"
+  #       uses: slackapi/slack-github-action@v1.25.0
+  #       with:
+  #         channel-id: "${{ env.SLACK_CHANNEL_ID }}"
+  #         payload-file-path: "./templates/notify-success.json"
