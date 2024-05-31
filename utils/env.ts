@@ -1,5 +1,5 @@
 import { getConfig } from "./config.ts";
-import { getBinaries } from "./binaries.ts";
+import { getBinaries, getDockerBinaries } from "./binaries.ts";
 
 import { DEPOT_CONFIG_PATH, DEPOT_REPO_NAME, GITHUB_ENV_PATH, GITHUB_IS_CI } from "./config.ts";
 import { DepotProject } from "./types.ts";
@@ -21,10 +21,11 @@ const build = async (repositoryName: string): Promise<void> => {
     await setEnv("DEPOT_BINARIES", await getProjectBinaryNames(project, "name"));
     await setEnv("DEPOT_BINARY_PATHS", await getProjectBinaryNames(project, "path"));
     await setEnv("DEPOT_BINARY_BUILD_NAME", await getProjectBinaryNames(project, "build"));
+    await setEnv("DEPOT_DOCKER_IMAGE_BINARIES", await getDockerImageBinaries(project));
 
     for (const key in project) {
         // Binaries and automatic_builds are a special case, we have already set these.
-        if (key == "binaries" || key == "automatic_builds") {
+        if (key == "binaries" || key == "automatic_builds" || key == "docker_image_binaries") {
             continue;
         } else if (project[key as keyof DepotProject] !== undefined) {
             await setEnv(`DEPOT_${key.toUpperCase()}`, project[key as keyof DepotProject] || "");
@@ -34,9 +35,9 @@ const build = async (repositoryName: string): Promise<void> => {
 
 const setEnv = async (key: string, value: string | string[] | boolean): Promise<void> => {
     // Convert arrays to newline separated strings.
-    if (Array.isArray(value)) {
-        value = value.join("\n");
-    }
+    // if (Array.isArray(value)) {
+    //     value = value.join("\n");
+    // }
 
     console.log(`>>> Setting ${key}=${value}`);
     // Environment variables are written to a file in GitHub Actions.
@@ -46,6 +47,11 @@ const setEnv = async (key: string, value: string | string[] | boolean): Promise<
         await Deno.writeTextFile(GITHUB_ENV_PATH, `${value}\n`, { append: true });
         await Deno.writeTextFile(GITHUB_ENV_PATH, `EOD${randomNumber}\n`, { append: true });
     }
+};
+
+const getDockerImageBinaries = async (project: DepotProject): Promise<string> => {
+    const binaries = await getDockerBinaries(project.repository);
+    return binaries.join(",")
 };
 
 const getProjectBinaryNames = async (project: DepotProject, target: string): Promise<string> => {

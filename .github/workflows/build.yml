@@ -15,11 +15,14 @@ on:
   repository_dispatch:
     types:
       - webhook
+  pull_request:
+    branches:
+      - master
 
 env:
-  DEPOT_BINARY_VERSION: "${{ inputs.binary_version }}"
-  DEPOT_REPOSITORY_ORG: "${{ inputs.repository_org }}"
-  DEPOT_REPOSITORY_NAME: "${{ inputs.repository_name }}"
+  DEPOT_BINARY_VERSION: "${{ inputs.binary_version || 'v14.0.1' }}"
+  DEPOT_REPOSITORY_ORG: "${{ inputs.repository_org  || 'zeta-chain' }}"
+  DEPOT_REPOSITORY_NAME: "${{ inputs.repository_name || 'node'}}"
   DEPOT_BUCKET_NAME: "depot"
   DEPOT_BUCKET_PUBLIC_URL: "https://depot.r2.restake.cloud"
   SLACK_BOT_TOKEN: "${{ secrets.SLACK_BOT_TOKEN }}"
@@ -35,7 +38,7 @@ jobs:
       depot_project_name: "${{ steps.set-outputs.outputs.depot_project_name }}"
       depot_automatic_builds: "${{ steps.set-outputs.outputs.depot_automatic_builds }}"
       depot_image_builds: "${{ steps.set-outputs.outputs.depot_image_builds }}"
-      depot_docker_image: "${{ steps.set-outputs.outputs.depot_docker_image }}"
+      depot_docker_image_binaries: "${{ steps.set-outputs.outputs.depot_docker_image_binaries }}"
     steps:
       - id: "checkout"
         name: "Checkout code"
@@ -58,7 +61,7 @@ jobs:
           echo "depot_image_builds=${{ env.DEPOT_IMAGE_BUILDS }}" >> $GITHUB_OUTPUT
           echo "depot_purpose=${{ env.DEPOT_PURPOSE }}" >> $GITHUB_OUTPUT
           echo "depot_project_name=${{ env.DEPOT_PROJECT_NAME }}" >> $GITHUB_OUTPUT
-          echo "depot_docker_image=${{ env.DEPOT_DOCKER_IMAGE }}" >> $GITHUB_OUTPUT
+          echo "depot_docker_image_binaries=${{ env.DEPOT_DOCKER_IMAGE_BINARIES }}" >> $GITHUB_OUTPUT
           printf "depot_binaries=%s" "${DEPOT_BINARIES//$'\n'/\\n}" >> $GITHUB_OUTPUT
 
       - id: "early-exit"
@@ -175,23 +178,26 @@ jobs:
     if: ${{ needs.build.outputs.depot_image_builds == 'true' && needs.build.result == 'success' }}
     outputs:
       build-status: "${{ needs.build.result }}"
-      image-name: "${{ needs.build.outputs.depot_docker_image }}"
+      image-names: "${{ needs.build.outputs.depot_docker_image_binaries }}"
       image-builds: "${{ needs.build.outputs.depot_image_builds }}"
     steps:
       - name: "Checkout repository"
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: "Download binary artifact"
-        uses: actions/download-artifact@v2
-        with:
-          name: binary
-          path: binary
+        uses: actions/download-artifact@v4
+
+      - id: "set_env"
+        name: "Set env variables"
+        run: |
+          echo "DEPOT_PROJECT_NAME=${{ needs.build.outputs.depot_project_name }}" >> "${GITHUB_ENV}"
+          echo "DEPOT_DOCKER_IMAGE_BINARIES=${{ needs.build.outputs.depot_docker_image_binaries }}" >> "${GITHUB_ENV}"
 
       - id: "login-ghcr"
         name: "Log in to the Container registry"
         uses: "docker/login-action@v3.1.0"
         with:
-          registry: "${{ env.DOCKER_REGISTRY }}"
+          registry: "ghcr.io"
           username: "restake-bot"
           password: "${{ secrets.RESTAKE_BOT_TOKEN }}"
 
@@ -199,17 +205,23 @@ jobs:
         id: "build_docker"
         run: bash "./scripts/build_docker.sh"
 
+      - name: "Save docker image"
+        run: |
+          cd archives
+          ls -la
+          cd ..
+
       - id: "publish-images"
         name: "Load and publish images to GHCR"
         run: |-
           set -euo pipefail
 
           github_tag="${GITHUB_REF#refs/tags/}"
-          image_name="${{ env.DOCKER_REGISTRY }}/${{ env.GITHUB_ORG }}/${{ env.DEPOT_DOCKER_IMAGE }}"
+          image_name="ghcr.io/${{ env.GITHUB_ORG }}/${{ env.DEPOT_PROJECT_NAME }}"
           built_tags=()
 
-          for file in archives/*/*; do
-            image_sha=$(docker load -i "${file}" | grep -o "${{ env.DEPOT_DOCKER_IMAGE }}:[a-f0-9]*")
+          for file in archives/*; do
+            image_sha=$(docker load -i "${file}" | grep -o "${{ env.DEPOT_PROJECT_NAME }}:[a-f0-9]*")
             image_arch=$(docker image inspect "${image_sha}" | jq -cer '.[].Architecture')
             image_tag="${image_name}:${github_tag}-${image_arch}"
             docker tag "${image_sha}" "${image_tag}"

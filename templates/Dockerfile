@@ -1,7 +1,9 @@
-FROM --platform=linux/amd64 ghcr.io/restake/blackbox:0.1.1
+FROM --platform=linux/amd64 ghcr.io/restake/blackbox:0.1.2
 
-ARG BINARY_LOCATION="/usr/local/bin/${DEPOT_DOCKER_IMAGE}"
 RUN mkdir -p /chain
 
-COPY "${DEPOT_DOCKER_IMAGE}" "${BINARY_LOCATION}"
-RUN chmod +x "${BINARY_LOCATION}"
+RUN IFS=',' \
+    && for binary in ${DEPOT_DOCKER_IMAGE_BINARIES}; do \
+        cp "${binary}" "/usr/local/bin/$(basename $binary)" \
+        && chmod +x "/usr/local/bin/$(basename $binary)"; \
+    done
