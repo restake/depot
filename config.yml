@@ -118,6 +118,7 @@
     - "sui"
     - "sui-node"
     - "sui-tool"
+    - "sui-bridge"
     - "sui-bridge-cli"
   builder: "rust"
   builder_version: "1.75"
