@@ -20,9 +20,9 @@ on:
       - master
 
 env:
-  DEPOT_BINARY_VERSION: "${{ inputs.binary_version || 'v14.0.1' }}"
-  DEPOT_REPOSITORY_ORG: "${{ inputs.repository_org  || 'zeta-chain' }}"
-  DEPOT_REPOSITORY_NAME: "${{ inputs.repository_name || 'node'}}"
+  DEPOT_BINARY_VERSION: "${{ inputs.binary_version || 'v6.6.41' }}"
+  DEPOT_REPOSITORY_ORG: "${{ inputs.repository_org  || 'ComposableFi' }}"
+  DEPOT_REPOSITORY_NAME: "${{ inputs.repository_name || 'composable-cosmos'}}"
   DEPOT_BUCKET_NAME: "depot"
   DEPOT_BUCKET_PUBLIC_URL: "https://depot.r2.restake.cloud"
   SLACK_BOT_TOKEN: "${{ secrets.SLACK_BOT_TOKEN }}"
@@ -201,37 +201,16 @@ jobs:
           username: "restake-bot"
           password: "${{ secrets.RESTAKE_BOT_TOKEN }}"
 
-      - name: "Build Docker image"
-        id: "build_docker"
-        run: bash "./scripts/build_docker.sh"
-
-      - name: "Save docker image"
-        run: |
-          cd archives
-          ls -la
-          cd ..
-
-      - id: "publish-images"
-        name: "Load and publish images to GHCR"
-        run: |-
-          set -euo pipefail
-
-          github_tag="${GITHUB_REF#refs/tags/}"
-          image_name="ghcr.io/${{ env.GITHUB_ORG }}/${{ env.DEPOT_PROJECT_NAME }}"
-          built_tags=()
-
-          for file in archives/*; do
-            image_sha=$(docker load -i "${file}" | grep -o "${{ env.DEPOT_PROJECT_NAME }}:[a-f0-9]*")
-            image_arch=$(docker image inspect "${image_sha}" | jq -cer '.[].Architecture')
-            image_tag="${image_name}:${github_tag}-${image_arch}"
-            docker tag "${image_sha}" "${image_tag}"
-            built_tags+=("${image_tag}")
-            docker push "${image_tag}"
-            docker image rm "${image_sha}"
-          done
-
-          docker manifest create "${image_name}:${github_tag}" "${built_tags[@]}"
-          docker manifest push "${image_name}:${github_tag}"
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: "templates/Dockerfile"
+          platforms: linux/amd64
+          push: true
+          no-cache: true
+          tags: |
+            ghcr.io/restake/${{env.DEPOT_PROJECT_NAME}}:${{env.DEPOT_BINARY_VERSION}}
 
   # notify:
   #   name: "Notify on Slack"

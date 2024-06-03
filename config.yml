@@ -13,21 +13,8 @@
   patches: false
   purpose: "node"
 
-- repository: "finality-provider"
-  project_name: "babylon-fp"
-  architecture: "x86_64"
-  binaries:
-    - "eotsd"
-    - "fpd"
-    - "fpcli"
-  builder: "go"
-  builder_version: "1.21.5"
-  cpu: "generic"
-  patches: false
-  purpose: "tool"
-
 - repository: "composable-cosmos"
-  automatic_builds: false
+  automatic_builds: true
   image_builds: true
   project_name: "centauri"
   architecture: "x86_64"
@@ -205,6 +192,19 @@
   binaries:
     - "stakerd"
     - "stakercli"
+  builder: "go"
+  builder_version: "1.21.5"
+  cpu: "generic"
+  patches: false
+  purpose: "tool"
+
+- repository: "finality-provider"
+  project_name: "babylon-fp"
+  architecture: "x86_64"
+  binaries:
+    - "eotsd"
+    - "fpd"
+    - "fpcli"
   builder: "go"
   builder_version: "1.21.5"
   cpu: "generic"

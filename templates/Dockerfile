@@ -1,4 +1,5 @@
 FROM --platform=linux/amd64 ghcr.io/restake/blackbox:0.1.2
+LABEL org.opencontainers.image.source=https://github.com/restake/depot
 
 RUN mkdir -p /chain
 
