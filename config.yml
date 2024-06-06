@@ -14,13 +14,13 @@
   purpose: "node"
 
 - repository: "composable-cosmos"
-  automatic_builds: true
-  image_builds: true
+  automatic_builds: false
+  docker_builds: true
   project_name: "centauri"
   architecture: "x86_64"
   binaries:
     - "picad"
-  docker_image_binaries:
+  docker_binaries:
     - "picad"
   builder: "go"
   builder_version: "1.21.5"
@@ -42,11 +42,11 @@
 - repository: "node"
   project_name: "zeta"
   architecture: "x86_64"
-  image_builds: true
+  docker_builds: true
   binaries:
     - "zetacored"
     - "zetaclientd"
-  docker_image_binaries:
+  docker_binaries:
     - "zetacored"
     - "zetaclientd"
   builder: "go"
@@ -201,7 +201,12 @@
 - repository: "finality-provider"
   project_name: "babylon-fp"
   architecture: "x86_64"
+  docker_builds: true
   binaries:
+    - "eotsd"
+    - "fpd"
+    - "fpcli"
+  docker_binaries:
     - "eotsd"
     - "fpd"
     - "fpcli"
