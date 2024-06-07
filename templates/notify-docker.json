@@ -5,7 +5,7 @@
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": "<https://ghcr.io/restake/depot/${{ env.DEPOT_PROJECT_NAME }}:${{ env.DEPOT_BINARY_VERSION }}|Docker image has been built and published!! 🐳>"
+                "text": "<https://ghcr.io/restake/depot/${{ env.DEPOT_PROJECT_NAME }}:${{ env.DEPOT_BINARY_VERSION }}|Docker image has been built and published! 🐳>"
             }
         },
         {
