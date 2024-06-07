@@ -34,6 +34,8 @@ jobs:
       depot_purpose: "${{ steps.set-outputs.outputs.depot_purpose }}"
       depot_project_name: "${{ steps.set-outputs.outputs.depot_project_name }}"
       depot_automatic_builds: "${{ steps.set-outputs.outputs.depot_automatic_builds }}"
+      depot_docker_builds: "${{ steps.set-outputs.outputs.depot_docker_builds }}"
+      depot_docker_binaries: "${{ steps.set-outputs.outputs.depot_docker_binaries }}"
     steps:
       - id: "checkout"
         name: "Checkout code"
@@ -53,8 +55,10 @@ jobs:
         name: "Set outputs to use in other jobs"
         run: |
           echo "depot_automatic_builds=${{ env.DEPOT_AUTOMATIC_BUILDS }}" >> $GITHUB_OUTPUT
+          echo "depot_docker_builds=${{ env.DEPOT_DOCKER_BUILDS }}" >> $GITHUB_OUTPUT
           echo "depot_purpose=${{ env.DEPOT_PURPOSE }}" >> $GITHUB_OUTPUT
           echo "depot_project_name=${{ env.DEPOT_PROJECT_NAME }}" >> $GITHUB_OUTPUT
+          echo "depot_docker_binaries=${{ env.DEPOT_DOCKER_BINARIES }}" >> $GITHUB_OUTPUT
           printf "depot_binaries=%s" "${DEPOT_BINARIES//$'\n'/\\n}" >> $GITHUB_OUTPUT
 
       - id: "early-exit"
@@ -165,8 +169,52 @@ jobs:
             fi
           done
 
-  notify:
-    name: "Notify on Slack"
+  docker:
+    name: "Build and Publish Docker"
+    runs-on: "ubuntu-latest"
+    needs: ["build"]
+    if: ${{ needs.build.outputs.depot_docker_builds == 'true' && needs.build.result == 'success' }}
+    outputs:
+      build-status: "${{ needs.build.result }}"
+      image-names: "${{ needs.build.outputs.depot_docker_binaries }}"
+      image-builds: "${{ needs.build.outputs.depot_docker_builds }}"
+    steps:
+      - id: "checkout"
+        name: "Checkout repository"
+        uses: actions/checkout@v4
+
+      - id: "download-binaries"
+        name: "Download binaries artifact"
+        uses: actions/download-artifact@v4
+
+      - id: "set-docker-env"
+        name: "Set environment variables for Docker"
+        run: |
+          echo "DEPOT_PROJECT_NAME=${{ needs.build.outputs.depot_project_name }}" >> "${GITHUB_ENV}"
+          echo "DEPOT_DOCKER_BINARIES=${{ needs.build.outputs.depot_docker_binaries }}" >> "${GITHUB_ENV}"
+
+      - id: "login-ghcr"
+        name: "Log in to the Container registry"
+        uses: "docker/login-action@v3.1.0"
+        with:
+          registry: "ghcr.io"
+          username: "restake-bot"
+          password: "${{ secrets.RESTAKE_BOT_TOKEN }}"
+
+      - id: "build-docker"
+        name: "Build and push Docker image"
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: "templates/Dockerfile"
+          platforms: "linux/amd64"
+          push: true
+          no-cache: true
+          tags: |
+            ghcr.io/restake/depot/${{ env.DEPOT_PROJECT_NAME }}:${{ env.DEPOT_BINARY_VERSION }}
+
+  notify-binary:
+    name: "Notify binary build success on Slack"
     runs-on: "ubuntu-latest"
     needs: ["build", "upload"]
     if: ${{ needs.build.outputs.depot_automatic_builds == 'true' && needs.build.result == 'success' || needs.upload.result == 'success' || needs.build.result != 'success' || needs.upload.result != 'success' }}
@@ -200,3 +248,31 @@ jobs:
         with:
           channel-id: "${{ env.SLACK_CHANNEL_ID }}"
           payload-file-path: "./templates/notify-success.json"
+
+  notify-docker:
+    name: "Notify Docker image build on Slack"
+    runs-on: "ubuntu-latest"
+    needs: ["build", "docker"]
+    if: ${{ needs.build.outputs.depot_docker_builds == 'true' && needs.docker.result == 'success' }}
+    outputs:
+      docker-status: "${{ needs.docker.result }}"
+    steps:
+      - id: "set-project-name"
+        name: "Set project name to envvar"
+        run: echo "DEPOT_PROJECT_NAME=${{ needs.build.outputs.depot_project_name }}" >> "${GITHUB_ENV}"
+
+      - id: "envvar-test"
+        run: |
+          echo ${{ env.DEPOT_PROJECT_NAME }}
+          echo ${{ env.DEPOT_BINARY_VERSION }}
+
+      - id: "checkout"
+        name: "Checkout code"
+        uses: actions/checkout@v4
+
+      - id: "slack-notify-docker"
+        name: "Notify Docker image build on Slack"
+        uses: slackapi/slack-github-action@v1.25.0
+        with:
+          channel-id: "${{ env.SLACK_CHANNEL_ID }}"
+          payload-file-path: "./templates/notify-docker.json"

@@ -10,10 +10,14 @@ Depot is an automated GitHub Actions workflow that simplifies the process of bui
 
 Depot automates the following key tasks:
 
+**Binaries:**
 - Building binaries for specified protocols
 - Applying patches if necessary
 - Uploading built binaries to an R2 bucket
 - Notifying on Slack when a new binary is built
+**Docker images:**
+- Building Docker images for specified protocols
+- Uploading built images to GitHub Container Registry
 
 **Built binaries can be found:** https://depot.r2.restake.cloud/node/{protocolname}/{version}/{binaryname}
 

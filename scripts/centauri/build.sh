@@ -4,7 +4,7 @@ set -euo pipefail
 cd "${DEPOT_PROJECT_NAME}"
 
 # Grab static libwasmvm
-wasmvm_version="$(go list -json -m all | jq -cer 'select(.Path == "github.com/CosmWasm/wasmvm") | .Replace.Version // .Version')"
+wasmvm_version="$(go list -json -m all | jq -cr 'select(.Path == "github.com/CosmWasm/wasmvm") | .Replace.Version // .Version')"
 curl -JLO "https://github.com/CosmWasm/wasmvm/releases/download/${wasmvm_version}/libwasmvm_muslc.x86_64.a"
 ln -s libwasmvm_muslc.x86_64.a libwasmvm.x86_64.a
 

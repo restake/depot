@@ -1,5 +1,5 @@
 {
-    "text": "*Binary build process has failed!* ❌",
+    "text": "Binary build process has failed! ❌",
     "blocks": [
         {
             "type": "section",

@@ -20,6 +20,17 @@ export const getBinaries = async (repositoryName: string): Promise<Record<string
     return binaries;
 };
 
+export const getDockerBinaries = async (repositoryName: string): Promise<string> => {
+    const config = await getConfig(DEPOT_CONFIG_PATH) as DepotProject[];
+    const project = config.find((project) => project.repository === repositoryName);
+
+    if (!project) {
+        throw new Error(`Project ${repositoryName} not found in config file`);
+    }
+
+    return project.docker_image_binaries?.join(',') ?? "";
+}
+
 if (DEPOT_REPO_NAME) {
     console.log(JSON.stringify(await getBinaries(DEPOT_REPO_NAME)));
 } else {

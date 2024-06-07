@@ -13,24 +13,14 @@
   patches: false
   purpose: "node"
 
-- repository: "finality-provider"
-  project_name: "babylon-fp"
-  architecture: "x86_64"
-  binaries:
-    - "eotsd"
-    - "fpd"
-    - "fpcli"
-  builder: "go"
-  builder_version: "1.21.5"
-  cpu: "generic"
-  patches: false
-  purpose: "tool"
-
 - repository: "composable-cosmos"
   automatic_builds: false
+  docker_builds: true
   project_name: "centauri"
   architecture: "x86_64"
   binaries:
+    - "picad"
+  docker_binaries:
     - "picad"
   builder: "go"
   builder_version: "1.21.5"
@@ -52,7 +42,11 @@
 - repository: "node"
   project_name: "zeta"
   architecture: "x86_64"
+  docker_builds: true
   binaries:
+    - "zetacored"
+    - "zetaclientd"
+  docker_binaries:
     - "zetacored"
     - "zetaclientd"
   builder: "go"
@@ -199,6 +193,24 @@
   binaries:
     - "stakerd"
     - "stakercli"
+  builder: "go"
+  builder_version: "1.21.5"
+  cpu: "generic"
+  patches: false
+  purpose: "tool"
+
+- repository: "finality-provider"
+  project_name: "babylon-fp"
+  architecture: "x86_64"
+  docker_builds: true
+  binaries:
+    - "eotsd"
+    - "fpd"
+    - "fpcli"
+  docker_binaries:
+    - "eotsd"
+    - "fpd"
+    - "fpcli"
   builder: "go"
   builder_version: "1.21.5"
   cpu: "generic"
