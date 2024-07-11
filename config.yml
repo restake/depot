@@ -16,7 +16,7 @@
 - repository: "composable-cosmos"
   automatic_builds: false
   docker_builds: true
-  project_name: "centauri"
+  project_name: "picasso"
   architecture: "x86_64"
   binaries:
     - "picad"
