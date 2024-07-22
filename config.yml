@@ -105,6 +105,19 @@
   patches: false
   purpose: "node"
 
+- repository: "agave"
+  project_name: "agave"
+  architecture: "x86_64"
+  binaries:
+    - "agave-validator"
+    - "agave-watchtower"
+    - "agave-ledger-tool"
+  builder: "rust"
+  builder_version: "1.75"
+  cpu: "znver3"
+  patches: false
+  purpose: "node"
+
 - repository: "sui"
   project_name: "sui"
   architecture: "x86_64"
