@@ -77,6 +77,17 @@
   patches: false
   purpose: "node"
 
+- repository: "lighthouse"
+  project_name: "lighthouse"
+  architecture: "x86_64"
+  binaries:
+    - "lighthouse"
+  builder: "rust"
+  builder_version: "1.78"
+  cpu: "generic"
+  patches: false
+  purpose: "node"
+
 - repository: "jito-solana"
   project_name: "jito"
   architecture: "x86_64"
