@@ -170,6 +170,17 @@
   patches: false
   purpose: "node"
 
+- repository: "celestia-app"
+  project_name: "celestia-app"
+  architecture: "x86_64"
+  binaries:
+    - "celestia-appd"
+  builder: "go"
+  builder_version: "1.22.4"
+  cpu: "generic"
+  patches: false
+  purpose: "node"
+
 # TOOLS
 - repository: "tmkms"
   project_name: "tmkms"
