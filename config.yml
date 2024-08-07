@@ -46,11 +46,12 @@
   binaries:
     - "zetacored"
     - "zetaclientd"
+    - "zetaclientd-supervisor"
   docker_binaries:
     - "zetacored"
     - "zetaclientd"
   builder: "go"
-  builder_version: "1.20"
+  builder_version: "1.22"
   cpu: "generic"
   patches: true
   purpose: "node"
