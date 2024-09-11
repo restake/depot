@@ -188,7 +188,7 @@
   binaries:
     - "celestia"
   builder: "go"
-  builder_version: "1.22.4"
+  builder_version: "1.23.1"
   cpu: "generic"
   patches: false
   purpose: "node"
