@@ -13,9 +13,11 @@ const build = async (repositoryName: string): Promise<void> => {
 
     // Set automatic_builds to true by default
     const automaticBuilds = (project.automatic_builds && project.automatic_builds !== undefined) ?? true;
+    const runBuild = (project.run_build && project.run_build !== undefined) ?? true;
 
     // Whether to build binaries automatically or not
     await setEnv("DEPOT_AUTOMATIC_BUILDS", automaticBuilds.toString());
+    await setEnv("DEPOT_RUN_BUILD", runBuild.toString());
 
     // The binaries we need to build for given project.
     await setEnv("DEPOT_BINARIES", await getProjectBinaryNames(project, "name"));
@@ -25,7 +27,7 @@ const build = async (repositoryName: string): Promise<void> => {
 
     for (const key in project) {
         // Binaries and automatic_builds are a special case, we have already set these.
-        if (key == "binaries" || key == "automatic_builds" || key == "docker_image_binaries") {
+        if (key == "binaries" || key == "automatic_builds" || key == "run_build") {
             continue;
         } else if (project[key as keyof DepotProject] !== undefined) {
             await setEnv(`DEPOT_${key.toUpperCase()}`, project[key as keyof DepotProject] || "");

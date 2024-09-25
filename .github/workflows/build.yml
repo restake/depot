@@ -26,9 +26,9 @@ env:
   SLACK_CHANNEL_ID: "C06QF8AKYMV"
 
 jobs:
-  build:
-    name: "Build"
-    runs-on: "ubuntu-latest-l"
+  outputs:
+    name: "Outputs"
+    runs-on: "ubuntu-latest"
     outputs:
       depot_binaries: "${{ steps.set-outputs.outputs.depot_binaries }}"
       depot_purpose: "${{ steps.set-outputs.outputs.depot_purpose }}"
@@ -36,6 +36,8 @@ jobs:
       depot_automatic_builds: "${{ steps.set-outputs.outputs.depot_automatic_builds }}"
       depot_docker_builds: "${{ steps.set-outputs.outputs.depot_docker_builds }}"
       depot_docker_binaries: "${{ steps.set-outputs.outputs.depot_docker_binaries }}"
+      depot_patches: "${{ steps.set-outputs.outputs.depot_patches }}"
+      depot_run_build: "${{ steps.set-outputs.outputs.depot_run_build }}"
     steps:
       - id: "checkout"
         name: "Checkout code"
@@ -59,17 +61,16 @@ jobs:
           echo "depot_purpose=${{ env.DEPOT_PURPOSE }}" >> $GITHUB_OUTPUT
           echo "depot_project_name=${{ env.DEPOT_PROJECT_NAME }}" >> $GITHUB_OUTPUT
           echo "depot_docker_binaries=${{ env.DEPOT_DOCKER_BINARIES }}" >> $GITHUB_OUTPUT
+          echo "depot_patches=${{ env.DEPOT_PATCHES }}" >> $GITHUB_OUTPUT
+          echo "depot_run_build=${{ env.DEPOT_RUN_BUILD }}" >> $GITHUB_OUTPUT
           printf "depot_binaries=%s" "${DEPOT_BINARIES//$'\n'/\\n}" >> $GITHUB_OUTPUT
 
-      - id: "early-exit"
-        name: "Early exit"
-        if: "${{ env.DEPOT_AUTOMATIC_BUILDS == 'false' && github.event_name != 'workflow_dispatch' }}"
-        run: |
-          gh run cancel ${{ github.run_id}}
-          gh run watch ${{ github.run_id}}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
+  build:
+    name: "Build"
+    runs-on: "ubuntu-latest-l"
+    needs: ["outputs"]
+    if: ${{ needs.outputs.outputs.DEPOT_RUN_BUILD == 'true' }}
+    steps:
       - id: "setup-builder-packages"
         name: "Install builder packages"
         run: bash ./builders/${{ env.DEPOT_BUILDER }}/deps.sh
@@ -98,7 +99,7 @@ jobs:
 
       - id: "apply-patches"
         name: "Apply patches"
-        if: ${{ env.DEPOT_PATCHES == 'true' }}
+        if: ${{ needs.outputs.outputs.depot_patches == 'true' }}
         run: |
           set -euo pipefail
           shopt -s nullglob
@@ -128,7 +129,7 @@ jobs:
     name: "Upload"
     needs: "build"
     runs-on: "ubuntu-latest"
-    if: ${{ needs.build.outputs.depot_automatic_builds == 'true' || github.event_name == 'workflow_dispatch' }}
+    if: ${{ needs.outputs.outputs.depot_automatic_builds == 'true' || github.event_name == 'workflow_dispatch' }}
     steps:
       - id: "checkout"
         name: "Checkout code"
@@ -157,7 +158,7 @@ jobs:
           for file in binaries/*; do
             if [ -f "$file" ]; then
               filename=$(basename "$file")
-              directory="${{ needs.build.outputs.depot_purpose }}/${{ needs.build.outputs.depot_project_name }}/${{ env.DEPOT_BINARY_VERSION }}"
+              directory="${{ needs.outputs.outputs.depot_purpose }}/${{ needs.outputs.outputs.depot_project_name }}/${{ env.DEPOT_BINARY_VERSION }}"
 
               rclone --config="rclone.conf" copy "$file" "r2:${{ env.DEPOT_BUCKET_NAME }}/${directory}"
 
@@ -173,11 +174,11 @@ jobs:
     name: "Build and Publish Docker"
     runs-on: "ubuntu-latest"
     needs: ["build"]
-    if: ${{ needs.build.outputs.depot_docker_builds == 'true' && needs.build.result == 'success' }}
+    if: ${{ needs.outputs.outputs.depot_docker_builds == 'true' && needs.build.result == 'success' }}
     outputs:
       build-status: "${{ needs.build.result }}"
-      image-names: "${{ needs.build.outputs.depot_docker_binaries }}"
-      image-builds: "${{ needs.build.outputs.depot_docker_builds }}"
+      image-names: "${{ needs.outputs.outputs.depot_docker_binaries }}"
+      image-builds: "${{ needs.outputs.outputs.depot_docker_builds }}"
     steps:
       - id: "checkout"
         name: "Checkout repository"
@@ -190,8 +191,8 @@ jobs:
       - id: "set-docker-env"
         name: "Set environment variables for Docker"
         run: |
-          echo "DEPOT_PROJECT_NAME=${{ needs.build.outputs.depot_project_name }}" >> "${GITHUB_ENV}"
-          echo "DEPOT_DOCKER_BINARIES=${{ needs.build.outputs.depot_docker_binaries }}" >> "${GITHUB_ENV}"
+          echo "DEPOT_PROJECT_NAME=${{ needs.outputs.outputs.depot_project_name }}" >> "${GITHUB_ENV}"
+          echo "DEPOT_DOCKER_BINARIES=${{ needs.outputs.outputs.depot_docker_binaries }}" >> "${GITHUB_ENV}"
 
       - id: "login-ghcr"
         name: "Log in to the Container registry"
@@ -217,7 +218,7 @@ jobs:
     name: "Notify binary build success on Slack"
     runs-on: "ubuntu-latest"
     needs: ["build", "upload"]
-    if: ${{ needs.build.outputs.depot_automatic_builds == 'true' && needs.build.result == 'success' || needs.upload.result == 'success' || needs.build.result != 'success' || needs.upload.result != 'success' }}
+    if: ${{ needs.outputs.outputs.depot_automatic_builds == 'true' && needs.build.result == 'success' || needs.upload.result == 'success' || needs.build.result != 'success' || needs.upload.result != 'success' }}
     outputs:
       build-status: "${{ needs.build.result }}"
       upload-status: "${{ needs.upload.result }}"
@@ -227,7 +228,7 @@ jobs:
         run: |
           workflow_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
           echo "WORKFLOW_URL=${workflow_url}" >> "${GITHUB_ENV}"
-          echo "DEPOT_BINARY_NAMES=${{ needs.build.outputs.depot_binaries }}" >> "${GITHUB_ENV}"
+          echo "DEPOT_BINARY_NAMES=${{ needs.outputs.outputs.depot_binaries }}" >> "${GITHUB_ENV}"
 
       - id: "checkout"
         name: "Checkout code"
@@ -253,13 +254,13 @@ jobs:
     name: "Notify Docker image build on Slack"
     runs-on: "ubuntu-latest"
     needs: ["build", "docker"]
-    if: ${{ needs.build.outputs.depot_docker_builds == 'true' && needs.docker.result == 'success' }}
+    if: ${{ needs.outputs.outputs.depot_docker_builds == 'true' && needs.docker.result == 'success' }}
     outputs:
       docker-status: "${{ needs.docker.result }}"
     steps:
       - id: "set-project-name"
         name: "Set project name to envvar"
-        run: echo "DEPOT_PROJECT_NAME=${{ needs.build.outputs.depot_project_name }}" >> "${GITHUB_ENV}"
+        run: echo "DEPOT_PROJECT_NAME=${{ needs.outputs.outputs.depot_project_name }}" >> "${GITHUB_ENV}"
 
       - id: "envvar-test"
         run: |
