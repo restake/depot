@@ -130,7 +130,7 @@ jobs:
     name: "Upload"
     # needs: "build"
     runs-on: "ubuntu-latest"
-    if: ${{ needs.build.outputs.depot_automatic_builds == 'true' || github.event_name == 'workflow_dispatch' }}
+    # if: ${{ needs.build.outputs.depot_automatic_builds == 'true' || github.event_name == 'workflow_dispatch' }}
     steps:
       - id: "checkout"
         name: "Checkout code"
