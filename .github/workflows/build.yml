@@ -154,11 +154,12 @@ jobs:
 
           printf "%s" "${{ secrets.R2_CONFIG }}" > rclone.conf
 
-          rclone --config="rclone.conf" lsf "r2:depot"
-
           cat rclone.conf > tadaa.txt
 
           cat tadaa.txt
+
+          rclone --config="rclone.conf" lsf "r2:depot"
+
 
   #     - id: "upload-binary"
   #       name: "Upload binary to R2 bucket and verify a successful upload"
