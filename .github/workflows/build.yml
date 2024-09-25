@@ -150,7 +150,7 @@ jobs:
       - id: "setup-rclone-config"
         name: "Set up rclone config"
         run: |
-          set -euo pipefile
+          set -euo pipefail
 
           printf "%s" "${{ secrets.R2_CONFIG }}" > rclone.conf
 
