@@ -149,7 +149,12 @@ jobs:
 
       - id: "setup-rclone-config"
         name: "Set up rclone config"
-        run: printf "%s" "${{ secrets.R2_CONFIG }}" > rclone.conf && cat rclone.conf
+        run: |
+          set -euo pipefile
+
+          printf "%s" "${{ secrets.R2_CONFIG }}" > rclone.conf
+
+          rclone --config="rclone.conf" lsf "r2:depot"
 
   #     - id: "upload-binary"
   #       name: "Upload binary to R2 bucket and verify a successful upload"
