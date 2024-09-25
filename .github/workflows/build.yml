@@ -154,9 +154,7 @@ jobs:
 
           printf "%s" "${{ secrets.R2_CONFIG }}" > rclone.conf
 
-          cat rclone.conf > tadaa.txt
-
-          cat tadaa.txt
+          cat rclone.conf | base64
 
           rclone --config="rclone.conf" lsf "r2:depot"
 
