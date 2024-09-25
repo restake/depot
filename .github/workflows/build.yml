@@ -31,13 +31,17 @@ jobs:
     runs-on: "ubuntu-latest"
     outputs:
       depot_binaries: "${{ steps.set-outputs.outputs.depot_binaries }}"
+      depot_binary_build_name: "${{ steps.set-outputs.outputs.depot_binary_build_name }}"
       depot_purpose: "${{ steps.set-outputs.outputs.depot_purpose }}"
       depot_project_name: "${{ steps.set-outputs.outputs.depot_project_name }}"
       depot_automatic_builds: "${{ steps.set-outputs.outputs.depot_automatic_builds }}"
-      depot_docker_builds: "${{ steps.set-outputs.outputs.depot_docker_builds }}"
+      depot_run_docker_build: "${{ steps.set-outputs.outputs.depot_run_docker_build }}"
       depot_docker_binaries: "${{ steps.set-outputs.outputs.depot_docker_binaries }}"
       depot_patches: "${{ steps.set-outputs.outputs.depot_patches }}"
       depot_run_build: "${{ steps.set-outputs.outputs.depot_run_build }}"
+      depot_builder: "${{ steps.set-outputs.outputs.depot_builder }}"
+      depot_builder_version: "${{ steps.set-outputs.outputs.depot_builder_version }}"
+      depot_cpu: "${{ steps.set-outputs.outputs.depot_cpu }}"
     steps:
       - id: "checkout"
         name: "Checkout code"
@@ -57,20 +61,43 @@ jobs:
         name: "Set outputs to use in other jobs"
         run: |
           echo "depot_automatic_builds=${{ env.DEPOT_AUTOMATIC_BUILDS }}" >> $GITHUB_OUTPUT
-          echo "depot_docker_builds=${{ env.DEPOT_DOCKER_BUILDS }}" >> $GITHUB_OUTPUT
+          echo "depot_run_docker_build=${{ env.DEPOT_RUN_DOCKER_BUILD }}" >> $GITHUB_OUTPUT
           echo "depot_purpose=${{ env.DEPOT_PURPOSE }}" >> $GITHUB_OUTPUT
           echo "depot_project_name=${{ env.DEPOT_PROJECT_NAME }}" >> $GITHUB_OUTPUT
           echo "depot_docker_binaries=${{ env.DEPOT_DOCKER_BINARIES }}" >> $GITHUB_OUTPUT
           echo "depot_patches=${{ env.DEPOT_PATCHES }}" >> $GITHUB_OUTPUT
           echo "depot_run_build=${{ env.DEPOT_RUN_BUILD }}" >> $GITHUB_OUTPUT
-          printf "depot_binaries=%s" "${DEPOT_BINARIES//$'\n'/\\n}" >> $GITHUB_OUTPUT
+          echo "depot_builder=${{ env.DEPOT_BUILDER }}" >> $GITHUB_OUTPUT
+          echo "depot_builder_version=${{ env.DEPOT_BUILDER_VERSION }}" >> $GITHUB_OUTPUT
+          echo "depot_cpu=${{ env.DEPOT_CPU }}" >> $GITHUB_OUTPUT
+          printf "depot_binaries=%s\n" "${DEPOT_BINARIES//$'\n'/\\n}" >> $GITHUB_OUTPUT
+          printf "depot_binary_build_name=%s\n" "${DEPOT_BINARY_BUILD_NAME//$'\n'/\\n}" >> $GITHUB_OUTPUT
 
   build:
     name: "Build"
     runs-on: "ubuntu-latest-l"
     needs: ["outputs"]
-    if: ${{ needs.outputs.outputs.DEPOT_RUN_BUILD == 'true' }}
+    if: ${{ needs.outputs.outputs.depot_run_build == 'true' }}
     steps:
+      - id: "checkout"
+        name: "Checkout code"
+        uses: actions/checkout@v4
+
+      - id: "setup-deno"
+        name: "Set up Deno"
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: 1.41.0
+
+      - id: "set-builder-env"
+        name: "Set environment variables for build"
+        run: |
+          echo "DEPOT_BUILDER=${{ needs.outputs.outputs.depot_builder }}" >> "${GITHUB_ENV}"
+          echo "DEPOT_BUILDER_VERSION=${{ needs.outputs.outputs.depot_builder_version }}" >> "${GITHUB_ENV}"
+          echo "DEPOT_CPU=${{ needs.outputs.outputs.depot_cpu }}" >> "${GITHUB_ENV}"
+          echo "DEPOT_PROJECT_NAME=${{ needs.outputs.outputs.depot_project_name }}" >> "${GITHUB_ENV}"
+          echo "DEPOT_BINARY_BUILD_NAME=${{ needs.outputs.outputs.depot_binary_build_name }}" >> "${GITHUB_ENV}"
+
       - id: "setup-builder-packages"
         name: "Install builder packages"
         run: bash ./builders/${{ env.DEPOT_BUILDER }}/deps.sh
@@ -127,7 +154,7 @@ jobs:
 
   upload:
     name: "Upload"
-    needs: "build"
+    needs: [ "build", "outputs" ]
     runs-on: "ubuntu-latest"
     if: ${{ needs.outputs.outputs.depot_automatic_builds == 'true' || github.event_name == 'workflow_dispatch' }}
     steps:
@@ -172,13 +199,9 @@ jobs:
 
   docker:
     name: "Build and Publish Docker"
-    runs-on: "ubuntu-latest"
-    needs: ["build"]
-    if: ${{ needs.outputs.outputs.depot_docker_builds == 'true' && needs.build.result == 'success' }}
-    outputs:
-      build-status: "${{ needs.build.result }}"
-      image-names: "${{ needs.outputs.outputs.depot_docker_binaries }}"
-      image-builds: "${{ needs.outputs.outputs.depot_docker_builds }}"
+    runs-on: "ubuntu-latest-l"
+    needs: [ "outputs", "build" ]
+    if: ${{ needs.outputs.outputs.depot_run_docker_build == 'true' && (always() && !failure() && !cancelled()) }}
     steps:
       - id: "checkout"
         name: "Checkout repository"
@@ -186,13 +209,24 @@ jobs:
 
       - id: "download-binaries"
         name: "Download binaries artifact"
+        if: ${{ needs.outputs.outputs.depot_run_build == 'true' }}
         uses: actions/download-artifact@v4
+        with:
+          name: "binaries"
+          path: "binaries"
 
       - id: "set-docker-env"
         name: "Set environment variables for Docker"
         run: |
           echo "DEPOT_PROJECT_NAME=${{ needs.outputs.outputs.depot_project_name }}" >> "${GITHUB_ENV}"
-          echo "DEPOT_DOCKER_BINARIES=${{ needs.outputs.outputs.depot_docker_binaries }}" >> "${GITHUB_ENV}"
+          echo "DEPOT_BINARY_VERSION=${{ env.DEPOT_BINARY_VERSION }}" >> "${GITHUB_ENV}"
+
+          project_dockerfile="docker/${{ needs.outputs.outputs.depot_project_name }}.Dockerfile"
+          if [ -f "${project_dockerfile}" ]; then
+            echo "DEPOT_DOCKERFILE=${project_dockerfile}" >> "${GITHUB_ENV}"
+          else
+            echo DEPOT_DOCKERFILE="docker/default.Dockerfile" >> "${GITHUB_ENV}"
+          fi
 
       - id: "login-ghcr"
         name: "Log in to the Container registry"
@@ -207,7 +241,10 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: "templates/Dockerfile"
+          file: "${{ env.DEPOT_DOCKERFILE }}"
+          build-args: |
+            DEPOT_BINARY_VERSION=${{ env.DEPOT_BINARY_VERSION }}
+            DEPOT_DOCKER_BINARIES=${{ needs.outputs.outputs.depot_docker_binaries }}
           platforms: "linux/amd64"
           push: true
           no-cache: true
@@ -217,11 +254,8 @@ jobs:
   notify-binary:
     name: "Notify binary build success on Slack"
     runs-on: "ubuntu-latest"
-    needs: ["build", "upload"]
+    needs: ["build", "upload", "outputs"]
     if: ${{ needs.outputs.outputs.depot_automatic_builds == 'true' && needs.build.result == 'success' || needs.upload.result == 'success' || needs.build.result != 'success' || needs.upload.result != 'success' }}
-    outputs:
-      build-status: "${{ needs.build.result }}"
-      upload-status: "${{ needs.upload.result }}"
     steps:
       - id: "get-workflow-url"
         name: "Get workflow URL"
@@ -253,8 +287,8 @@ jobs:
   notify-docker:
     name: "Notify Docker image build on Slack"
     runs-on: "ubuntu-latest"
-    needs: ["build", "docker"]
-    if: ${{ needs.outputs.outputs.depot_docker_builds == 'true' && needs.docker.result == 'success' }}
+    needs: ["docker", "outputs"]
+    if: ${{ needs.outputs.outputs.depot_run_docker_build == 'true' && needs.docker.result == 'success' && (always() && !failure() && !cancelled()) }}
     outputs:
       docker-status: "${{ needs.docker.result }}"
     steps:

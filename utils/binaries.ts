@@ -13,9 +13,12 @@ export const getBinaries = async (repositoryName: string): Promise<Record<string
 
     const binaries: Record<string, string> = {};
 
-    project.binaries.forEach((binary) => {
-        binaries[binary] = `${GITHUB_WORKSPACE}/${project.project_name}/bin/${binary}-${project.cpu}-${project.architecture}`;
-    });
+    if (project.binaries) {
+        project.binaries.forEach((binary) => {
+            binaries[binary] = `${GITHUB_WORKSPACE}/${project.project_name}/bin/${binary}-${project.cpu}-${project.architecture}`;
+        });
+        return binaries;
+    }
 
     return binaries;
 };
@@ -28,7 +31,7 @@ export const getDockerBinaries = async (repositoryName: string): Promise<string>
         throw new Error(`Project ${repositoryName} not found in config file`);
     }
 
-    return project.docker_image_binaries?.join(',') ?? "";
+    return project.docker_binaries?.join(',') ?? "";
 }
 
 if (DEPOT_REPO_NAME) {

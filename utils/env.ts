@@ -14,16 +14,20 @@ const build = async (repositoryName: string): Promise<void> => {
     // Set automatic_builds to true by default
     const automaticBuilds = (project.automatic_builds && project.automatic_builds !== undefined) ?? true;
     const runBuild = (project.run_build && project.run_build !== undefined) ?? true;
+    const runDockerBuild = (project.run_build && project.run_build !== undefined) ?? false;
 
     // Whether to build binaries automatically or not
     await setEnv("DEPOT_AUTOMATIC_BUILDS", automaticBuilds.toString());
     await setEnv("DEPOT_RUN_BUILD", runBuild.toString());
+    await setEnv("DEPOT_RUN_DOCKER_BUILD", runDockerBuild.toString());
 
     // The binaries we need to build for given project.
-    await setEnv("DEPOT_BINARIES", await getProjectBinaryNames(project, "name"));
-    await setEnv("DEPOT_BINARY_PATHS", await getProjectBinaryNames(project, "path"));
-    await setEnv("DEPOT_BINARY_BUILD_NAME", await getProjectBinaryNames(project, "build"));
-    await setEnv("DEPOT_DOCKER_BINARIES", await getDockerBinaries(repositoryName));
+    if (runBuild === true) {
+        await setEnv("DEPOT_BINARIES", await getProjectBinaryNames(project, "name"));
+        await setEnv("DEPOT_BINARY_PATHS", await getProjectBinaryNames(project, "path"));
+        await setEnv("DEPOT_BINARY_BUILD_NAME", await getProjectBinaryNames(project, "build"));
+        await setEnv("DEPOT_DOCKER_BINARIES", await getDockerBinaries(repositoryName));
+    }
 
     for (const key in project) {
         // Binaries and automatic_builds are a special case, we have already set these.
