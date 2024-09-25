@@ -4,10 +4,10 @@ export type DepotProject = {
     project_name: string;
     architecture: string;
     binaries: string[];
-    docker_image_binaries?: string[];
     builder: string;
     builder_version: string;
     binary_name: string;
+    run_build: boolean;
     cpu: string;
     patches: boolean;
     purpose: string;
