@@ -15,7 +15,7 @@
 
 - repository: "composable-cosmos"
   automatic_builds: false
-  docker_builds: true
+  run_docker_build: true
   project_name: "picasso"
   architecture: "x86_64"
   binaries:
@@ -42,7 +42,7 @@
 - repository: "node"
   project_name: "zeta"
   architecture: "x86_64"
-  docker_builds: true
+  run_docker_build: true
   binaries:
     - "zetacored"
     - "zetaclientd"
@@ -193,6 +193,26 @@
   patches: false
   purpose: "node"
 
+- repository: "linera-protocol"
+  project_name: "linera"
+  architecture: "x86_64"
+  run_docker_build: true
+  binaries:
+    - "linera"
+    - "linera-db"
+    - "linera-proxy"
+    - "linera-schema-export"
+    - "linera-server"
+  docker_binaries:
+    - "linera"
+    - "linera-db"
+    - "linera-server"
+  builder: "rust"
+  builder_version: "1.75"
+  cpu: "generic"
+  patches: false
+  purpose: "node"
+
 # TOOLS
 - repository: "tmkms"
   project_name: "tmkms"
@@ -253,7 +273,7 @@
 - repository: "finality-provider"
   project_name: "babylon-fp"
   architecture: "x86_64"
-  docker_builds: true
+  run_docker_build: true
   binaries:
     - "eotsd"
     - "fpd"
@@ -267,3 +287,11 @@
   cpu: "generic"
   patches: false
   purpose: "tool"
+
+# Docker images
+
+- repository: "bouncebit"
+  project_name: "bouncebit"
+  architecture: "x86_64"
+  run_docker_build: true
+  run_build: false
