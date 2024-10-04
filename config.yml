@@ -207,6 +207,7 @@
     - "linera"
     - "linera-db"
     - "linera-server"
+    - "linera-proxy"
   builder: "rust"
   builder_version: "1.75"
   cpu: "generic"
