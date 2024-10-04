@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 ghcr.io/restake/blackbox:v0.1.5
+FROM --platform=linux/amd64 ghcr.io/restake/blackbox:v0.1.6
 LABEL org.opencontainers.image.source=https://github.com/restake/depot
 
 ARG DEPOT_DOCKER_BINARIES
