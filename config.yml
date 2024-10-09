@@ -289,6 +289,17 @@
   patches: false
   purpose: "tool"
 
+- repository: "jito-relayer"
+  project_name: "jito-relayer"
+  architecture: "x86_64"
+  binaries:
+    - "jito-transaction-relayer"
+  builder: "rust"
+  builder_version: "1.76"
+  cpu: "znver4"
+  patches: false
+  purpose: "tool"
+
 # Docker images
 
 - repository: "bouncebit"
