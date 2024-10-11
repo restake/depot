@@ -51,7 +51,7 @@
     - "zetacored"
     - "zetaclientd"
   builder: "go"
-  builder_version: "1.22"
+  builder_version: "1.22.4"
   cpu: "generic"
   patches: true
   purpose: "node"
