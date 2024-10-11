@@ -4,7 +4,7 @@ set -euo pipefail
 cd "${DEPOT_PROJECT_NAME}"
 mkdir bin
 
-make build
+make install
 
 build_binaries="$(deno run --allow-read --allow-env ../utils/binaries.ts)"
 
