@@ -307,7 +307,7 @@
     - "jito-transaction-relayer"
   builder: "rust"
   builder_version: "1.76"
-  cpu: "x86_64"
+  cpu: "x86-64"
   patches: false
   purpose: "tool"
 
