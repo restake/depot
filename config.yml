@@ -67,6 +67,17 @@
   patches: false
   purpose: "node"
 
+- repository: "grandinetech"
+  project_name: "grandine"
+  architecture: "x86_64"
+  binaries:
+    - "grandine"
+  builder: "rust"
+  builder_version: "1.78"
+  cpu: "generic"
+  patches: false
+  purpose: "node"
+
 - repository: "ssc"
   project_name: "saga"
   architecture: "x86_64"
