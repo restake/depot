@@ -67,7 +67,7 @@
   patches: false
   purpose: "node"
 
-- repository: "grandinetech"
+- repository: "grandine"
   project_name: "grandine"
   architecture: "x86_64"
   binaries:
