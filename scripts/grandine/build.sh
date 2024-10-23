@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-sudo apt-get install -y --no-install-recommends ca-certificates unzip
-
 cd "${DEPOT_PROJECT_NAME}"
 git submodule update --init dedicated_executor eth2_libp2p
 mkdir bin
