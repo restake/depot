@@ -236,6 +236,17 @@
   patches: false
   purpose: "node"
 
+- repository: "namada"
+  project_name: "namada"
+  architecture: "x86_64"
+  binaries:
+    - "namada"
+  builder: "rust"
+  builder_version: "1.80"
+  cpu: "x86_64"
+  patches: false
+  purpose: "node"
+
 # TOOLS
 - repository: "tmkms"
   project_name: "tmkms"
