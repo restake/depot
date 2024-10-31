@@ -104,7 +104,7 @@
   project_name: "jito"
   architecture: "x86_64"
   binaries:
-    - "solana-validator"
+    - "agave-validator"
   builder: "rust"
   builder_version: "1.76"
   cpu: "znver4"

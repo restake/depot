@@ -9,7 +9,7 @@ export CARGO_BUILD_TARGET="x86_64-unknown-linux-gnu"
 export CARGO_BUILD_RUSTFLAGS="-C target-cpu=${DEPOT_CPU}"
 export CARGO_INCREMENTAL="0"
 
-cargo build --profile release --bin solana-validator
+cargo build --profile release --bin agave-validator
 
 build_binaries="$(deno run --allow-read --allow-env ../utils/binaries.ts)"
 
