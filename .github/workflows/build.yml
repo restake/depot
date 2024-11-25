@@ -136,7 +136,8 @@ jobs:
         with:
           repository: "${{ env.DEPOT_REPOSITORY_ORG }}/${{ env.DEPOT_REPOSITORY_NAME }}"
           path: "${{ env.DEPOT_PROJECT_NAME }}"
-          ref: "refs/${{ env.DEPOT_BINARY_HASH }}"
+          ref: "${{ env.DEPOT_BINARY_HASH }}"
+          fetch-depth: 1
           submodules: true
 
       - id: "apply-patches"
@@ -197,7 +198,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          VERSION="${DEPOT_BINARY_VERSION:-$DEPOT_BINARY_HASH}"
+          VERSION="${DEPOT_BINARY_VERSION:-SHA-$DEPOT_BINARY_HASH}"
 
           for file in binaries/*; do
             if [ -f "$file" ]; then
