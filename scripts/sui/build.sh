@@ -14,7 +14,7 @@ if [[ -n "${DEPOT_BINARY_HASH:-}" ]]; then
 
   build_binaries="$(deno run --allow-read --allow-env ../utils/binaries.ts)"
   echo "${build_binaries}" | jq -r 'to_entries[] | "\(.key) \(.value)"' | while read -r binary path; do
-    mv -v "target/${CARGO_BUILD_TARGET}/release/${binary}" "${path}"
+    mv -f -v "target/${CARGO_BUILD_TARGET}/release/${binary}" "${path}"
   done
 else
   echo "Building binaries from tags..."
