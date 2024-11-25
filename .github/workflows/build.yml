@@ -5,7 +5,10 @@ on:
     inputs:
       binary_version:
         description: "Specify the version"
-        required: true
+        required: false
+      binary_hash:
+        description: "Specify the release hash"
+        required: false
       repository_name:
         description: "Specify the repository"
         required: true
@@ -17,6 +20,7 @@ on:
       - webhook
 
 env:
+  DEPOT_BINARY_HASH: "${{ inputs.binary_hash }}"
   DEPOT_BINARY_VERSION: "${{ inputs.binary_version }}"
   DEPOT_REPOSITORY_ORG: "${{ inputs.repository_org }}"
   DEPOT_REPOSITORY_NAME: "${{ inputs.repository_name }}"
@@ -114,14 +118,25 @@ jobs:
         name: "Setup builder"
         run: bash ./builders/${{ env.DEPOT_BUILDER }}/setup.sh
 
-      - id: "clone"
-        name: "Clone protocol source"
+      - id: "clone-tags"
+        name: "Clone protocol source from tags"
         uses: "actions/checkout@v4"
+        if: "${{ env.DEPOT_BINARY_VERSION != '' }}"
         with:
           repository: "${{ env.DEPOT_REPOSITORY_ORG }}/${{ env.DEPOT_REPOSITORY_NAME }}"
           fetch-tags: true
           path: "${{ env.DEPOT_PROJECT_NAME }}"
           ref: "refs/tags/${{ env.DEPOT_BINARY_VERSION }}"
+          submodules: true
+
+      - id: "clone-ref"
+        name: "Clone protocol source from specified reference"
+        uses: "actions/checkout@v4"
+        if: "${{ env.DEPOT_BINARY_HASH != '' }}"
+        with:
+          repository: "${{ env.DEPOT_REPOSITORY_ORG }}/${{ env.DEPOT_REPOSITORY_NAME }}"
+          path: "${{ env.DEPOT_PROJECT_NAME }}"
+          ref: "refs/${{ env.DEPOT_BINARY_HASH }}"
           submodules: true
 
       - id: "apply-patches"
@@ -182,10 +197,12 @@ jobs:
         run: |
           set -euo pipefail
 
+          VERSION="${DEPOT_BINARY_VERSION:-$DEPOT_BINARY_HASH}"
+
           for file in binaries/*; do
             if [ -f "$file" ]; then
               filename=$(basename "$file")
-              directory="${{ needs.outputs.outputs.depot_purpose }}/${{ needs.outputs.outputs.depot_project_name }}/${{ env.DEPOT_BINARY_VERSION }}"
+              directory="${{ needs.outputs.outputs.depot_purpose }}/${{ needs.outputs.outputs.depot_project_name }}/${VERSION}"
 
               rclone --config="rclone.conf" copy "$file" "r2:${{ env.DEPOT_BUCKET_NAME }}/${directory}"
 
@@ -219,7 +236,10 @@ jobs:
         name: "Set environment variables for Docker"
         run: |
           echo "DEPOT_PROJECT_NAME=${{ needs.outputs.outputs.depot_project_name }}" >> "${GITHUB_ENV}"
-          echo "DEPOT_BINARY_VERSION=${{ env.DEPOT_BINARY_VERSION }}" >> "${GITHUB_ENV}"
+
+          VERSION="${DEPOT_BINARY_VERSION:-$DEPOT_BINARY_HASH}"
+
+          echo "DEPOT_BINARY_VERSION=${VERSION}" >> "${GITHUB_ENV}"
 
           project_dockerfile="docker/${{ needs.outputs.outputs.depot_project_name }}.Dockerfile"
           if [ -f "${project_dockerfile}" ]; then
@@ -295,11 +315,6 @@ jobs:
       - id: "set-project-name"
         name: "Set project name to envvar"
         run: echo "DEPOT_PROJECT_NAME=${{ needs.outputs.outputs.depot_project_name }}" >> "${GITHUB_ENV}"
-
-      - id: "envvar-test"
-        run: |
-          echo ${{ env.DEPOT_PROJECT_NAME }}
-          echo ${{ env.DEPOT_BINARY_VERSION }}
 
       - id: "checkout"
         name: "Checkout code"
