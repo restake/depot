@@ -247,6 +247,17 @@
   patches: false
   purpose: "node"
 
+- repository: "symbiotic"
+  project_name: "symbiotic"
+  architecture: "x86_64"
+  binaries:
+    - "symd"
+  builder: "go"
+  builder_version: "1.23.1"
+  cpu: "generic"
+  patches: false
+  purpose: "node"
+
 # TOOLS
 - repository: "tmkms"
   project_name: "tmkms"
