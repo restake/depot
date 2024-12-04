@@ -2,24 +2,38 @@
 set -euo pipefail
 
 cd "${DEPOT_PROJECT_NAME}"
-mkdir bin
 
-export CARGO_BUILD_TARGET="x86_64-unknown-linux-gnu"
-export CARGO_INCREMENTAL="0"
+if [[ -n "${DEPOT_BINARY_HASH:-}" ]]; then
+  echo "Building binaries from specific hash: ${DEPOT_BINARY_HASH}"
 
-# Replace literal '\n' with actual newlines for proper splitting
-binaries=$(echo -e "${DEPOT_BINARY_BUILD_NAME}")
+  mkdir -p bin
+  export CARGO_BUILD_TARGET="x86_64-unknown-linux-gnu"
+  export CARGO_INCREMENTAL="0"
 
-args=()
+  cargo build --release --bin sui --bin sui-bridge-cli --bin sui-bridge
 
-while IFS= read -r binary; do
+  build_binaries="$(deno run --allow-read --allow-env ../utils/binaries.ts)"
+  echo "${build_binaries}" | jq -r 'to_entries[] | "\(.key) \(.value)"' | while read -r binary path; do
+    if [ -f "target/${CARGO_BUILD_TARGET}/release/${binary}" ]; then
+      mv -v "target/${CARGO_BUILD_TARGET}/release/${binary}" "${path}"
+    fi
+  done
+else
+  echo "Building binaries from tags..."
+  mkdir -p bin
+  export CARGO_BUILD_TARGET="x86_64-unknown-linux-gnu"
+  export CARGO_INCREMENTAL="0"
+
+  binaries=$(echo -e "${DEPOT_BINARY_BUILD_NAME}")
+  args=()
+  while IFS= read -r binary; do
     args+=(--bin "${binary}")
-done <<< "${binaries}"
+  done <<< "${binaries}"
 
-cargo build --release "${args[@]}"
+  cargo build --release "${args[@]}"
 
-build_binaries="$(deno run --allow-read --allow-env ../utils/binaries.ts)"
-
-echo "${build_binaries}" | jq -r 'to_entries[] | "\(.key) \(.value)"' | while read -r binary path; do
+  build_binaries="$(deno run --allow-read --allow-env ../utils/binaries.ts)"
+  echo "${build_binaries}" | jq -r 'to_entries[] | "\(.key) \(.value)"' | while read -r binary path; do
     mv -v "target/${CARGO_BUILD_TARGET}/release/${binary}" "${path}"
-done
+  done
+fi
