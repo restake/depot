@@ -247,7 +247,7 @@
   patches: false
   purpose: "node"
 
-- repository: "symbiotic"
+- repository: "cosmos-sdk"
   project_name: "symbiotic"
   architecture: "x86_64"
   binaries:
