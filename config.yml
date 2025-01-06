@@ -34,7 +34,7 @@
   binaries:
     - "dymd"
   builder: "go"
-  builder_version: "1.21.5"
+  builder_version: "1.22.4"
   cpu: "generic"
   patches: false
   purpose: "node"
