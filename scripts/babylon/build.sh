@@ -10,7 +10,7 @@ wasmvm_version="$(go list -json -m all | jq -cr 'select(.Path == "github.com/Cos
 curl -JLO "https://github.com/CosmWasm/wasmvm/releases/download/${wasmvm_version}/libwasmvm_muslc.x86_64.a"
 ln -s libwasmvm_muslc.x86_64.a libwasmvm.x86_64.a
 
-make CC="x86_64-linux-musl-gcc" CGO_LDFLAGS="-L." LEDGER_ENABLED=false LINK_STATICALLY=true build
+make CC="x86_64-linux-musl-gcc" CGO_LDFLAGS="-L." LEDGER_ENABLED=false LINK_STATICALLY=true BABYLON_BUILD_OPTIONS=testnet build
 
 build_binaries="$(deno run --allow-read --allow-env ../utils/binaries.ts)"
 
