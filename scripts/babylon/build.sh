@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -euo pipefail
 
 cd "${DEPOT_PROJECT_NAME}"
 mkdir bin
