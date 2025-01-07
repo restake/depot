@@ -322,11 +322,9 @@
   binaries:
     - "eotsd"
     - "fpd"
-    - "fpcli"
   docker_binaries:
     - "eotsd"
     - "fpd"
-    - "fpcli"
   builder: "go"
   builder_version: "1.21.5"
   cpu: "generic"
