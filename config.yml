@@ -258,6 +258,17 @@
   patches: false
   purpose: "node"
 
+- repository: "gonative"
+  project_name: "native"
+  architecture: "x86_64"
+  binaries:
+    - "gonative"
+  builder: "go"
+  builder_version: "1.23.4"
+  cpu: "generic"
+  patches: false
+  purpose: "node"
+
 # TOOLS
 - repository: "tmkms"
   project_name: "tmkms"
