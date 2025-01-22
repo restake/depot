@@ -32,7 +32,7 @@ env:
 jobs:
   outputs:
     name: "Outputs"
-    runs-on: "ubuntu-latest"
+    runs-on: "ubuntu-22.04"
     outputs:
       depot_binaries: "${{ steps.set-outputs.outputs.depot_binaries }}"
       depot_binary_build_name: "${{ steps.set-outputs.outputs.depot_binary_build_name }}"
@@ -79,7 +79,7 @@ jobs:
 
   build:
     name: "Build"
-    runs-on: "ubuntu-latest-l"
+    runs-on: "ubuntu-22.04-l"
     needs: ["outputs"]
     if: ${{ needs.outputs.outputs.depot_run_build == 'true' }}
     steps:
@@ -171,7 +171,7 @@ jobs:
   upload:
     name: "Upload"
     needs: [ "build", "outputs" ]
-    runs-on: "ubuntu-latest"
+    runs-on: "ubuntu-22.04"
     if: ${{ needs.outputs.outputs.depot_automatic_builds == 'true' || github.event_name == 'workflow_dispatch' }}
     steps:
       - id: "checkout"
@@ -217,7 +217,7 @@ jobs:
 
   docker:
     name: "Build and Publish Docker"
-    runs-on: "ubuntu-latest-l"
+    runs-on: "ubuntu-22.04-l"
     needs: [ "outputs", "build" ]
     if: ${{ needs.outputs.outputs.depot_run_docker_build == 'true' && (always() && !failure() && !cancelled()) }}
     steps:
@@ -274,7 +274,7 @@ jobs:
 
   notify-binary:
     name: "Notify binary build success on Slack"
-    runs-on: "ubuntu-latest"
+    runs-on: "ubuntu-22.04"
     needs: ["build", "upload", "outputs"]
     if: ${{ needs.outputs.outputs.depot_automatic_builds == 'true' && needs.build.result == 'success' || needs.upload.result == 'success' || needs.build.result != 'success' || needs.upload.result != 'success' }}
     steps:
@@ -307,7 +307,7 @@ jobs:
 
   notify-docker:
     name: "Notify Docker image build on Slack"
-    runs-on: "ubuntu-latest"
+    runs-on: "ubuntu-22.04"
     needs: ["docker", "outputs"]
     if: ${{ needs.outputs.outputs.depot_run_docker_build == 'true' && needs.docker.result == 'success' && (always() && !failure() && !cancelled()) }}
     outputs:
