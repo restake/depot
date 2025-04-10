@@ -4,7 +4,7 @@ set -euo pipefail
 cd "${DEPOT_PROJECT_NAME}"
 mkdir bin
 
-go build -ldflags '-s -w' -trimpath -o horcrux-proxy main.go
+go build -ldflags '-s -w' -trimpath -o horcrux-proxy .
 
 build_binaries="$(deno run --allow-read --allow-env ../utils/binaries.ts)"
 
