@@ -364,6 +364,17 @@
   patches: false
   purpose: "tool"
 
+- repository: "horcrux-proxy"
+  project_name: "horcrux-proxy"
+  architecture: "x86_64"
+  binaries:
+    - "horcrux-proxy"
+  builder: "go"
+  builder_version: "1.22.4"
+  cpu: "generic"
+  patches: false
+  purpose: "tool"
+
 # Docker images
 
 - repository: "bouncebit"
