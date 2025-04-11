@@ -10,7 +10,7 @@ if [[ -n "${DEPOT_BINARY_HASH:-}" ]]; then
   export CARGO_BUILD_TARGET="x86_64-unknown-linux-gnu"
   export CARGO_INCREMENTAL="0"
 
-  cargo build --release --bin sui --bin sui-bridge-cli --bin sui-bridge
+  cargo build --release --bin sui --bin sui-bridge-cli --bin sui-bridge --bin sui-node
 
   build_binaries="$(deno run --allow-read --allow-env ../utils/binaries.ts)"
   echo "${build_binaries}" | jq -r 'to_entries[] | "\(.key) \(.value)"' | while read -r binary path; do
