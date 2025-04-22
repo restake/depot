@@ -314,6 +314,18 @@
   patches: false
   purpose: "tool"
 
+- repository: "ewm-das"
+  project_name: "ewm-das"
+  architecture: "x86_64"
+  binaries:
+    - "pinner"
+    - "pinner-cli"
+  builder: "go"
+  builder_version: "1.24.1"
+  cpu: "generic"
+  patches: false
+  purpose: "tool"
+
 - repository: "composable"
   project_name: "picasso-price-feed"
   architecture: "x86_64"
