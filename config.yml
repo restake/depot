@@ -387,6 +387,17 @@
   patches: false
   purpose: "tool"
 
+- repository: "gaia"
+  project_name: "cosmoshub"
+  architecture: "x86_64"
+  binaries:
+    - "gaiad"
+  builder: "go"
+  builder_version: "1.22.4"
+  cpu: "generic"
+  patches: false
+  purpose: "node"
+
 # Docker images
 
 - repository: "bouncebit"
