@@ -1,74 +1,70 @@
 {
-  "version": "3",
-  "packages": {
-    "specifiers": {
-      "jsr:@oak/commons@0.7": "jsr:@oak/commons@0.7.0",
-      "jsr:@std/assert@0.218": "jsr:@std/assert@0.218.2",
-      "jsr:@std/assert@^0.218.2": "jsr:@std/assert@0.218.2",
-      "jsr:@std/bytes@0.218": "jsr:@std/bytes@0.218.2",
-      "jsr:@std/bytes@^0.218.2": "jsr:@std/bytes@0.218.2",
-      "jsr:@std/crypto@0.218": "jsr:@std/crypto@0.218.2",
-      "jsr:@std/encoding@0.218": "jsr:@std/encoding@0.218.2",
-      "jsr:@std/encoding@^0.218.2": "jsr:@std/encoding@0.218.2",
-      "jsr:@std/http@0.218": "jsr:@std/http@0.218.2",
-      "jsr:@std/io@0.218": "jsr:@std/io@0.218.2",
-      "jsr:@std/media-types@0.218": "jsr:@std/media-types@0.218.2",
-      "jsr:@std/path@0.218": "jsr:@std/path@0.218.2",
-      "npm:@types/node": "npm:@types/node@18.16.19",
-      "npm:path-to-regexp@6.2.1": "npm:path-to-regexp@6.2.1"
+  "version": "4",
+  "specifiers": {
+    "jsr:@oak/commons@0.7": "0.7.0",
+    "jsr:@std/assert@0.218": "0.218.2",
+    "jsr:@std/assert@~0.218.2": "0.218.2",
+    "jsr:@std/bytes@0.218": "0.218.2",
+    "jsr:@std/bytes@~0.218.2": "0.218.2",
+    "jsr:@std/crypto@0.218": "0.218.2",
+    "jsr:@std/encoding@0.218": "0.218.2",
+    "jsr:@std/encoding@~0.218.2": "0.218.2",
+    "jsr:@std/http@0.218": "0.218.2",
+    "jsr:@std/io@0.218": "0.218.2",
+    "jsr:@std/media-types@0.218": "0.218.2",
+    "jsr:@std/path@0.218": "0.218.2",
+    "npm:@types/node@*": "18.16.19",
+    "npm:path-to-regexp@6.2.1": "6.2.1"
+  },
+  "jsr": {
+    "@oak/commons@0.7.0": {
+      "integrity": "4bd889b3dc9ddac1b602034d88c137f06de7078775961b51081beb5f175c120b"
     },
-    "jsr": {
-      "@oak/commons@0.7.0": {
-        "integrity": "4bd889b3dc9ddac1b602034d88c137f06de7078775961b51081beb5f175c120b"
-      },
-      "@std/assert@0.218.2": {
-        "integrity": "7f0a5a1a8cf86607cd6c2c030584096e1ffad27fc9271429a8cb48cfbdee5eaf"
-      },
-      "@std/bytes@0.218.2": {
-        "integrity": "91fe54b232dcca73856b79a817247f4a651dbb60d51baafafb6408c137241670"
-      },
-      "@std/crypto@0.218.2": {
-        "integrity": "8c5031a3a1c3ac3bed3c0d4bed2fe7e7faedcb673bbfa0edd10570c8452f5cd2",
-        "dependencies": [
-          "jsr:@std/assert@^0.218.2",
-          "jsr:@std/encoding@^0.218.2"
-        ]
-      },
-      "@std/encoding@0.218.2": {
-        "integrity": "da55a763c29bf0dbf06fd286430b358266eb99c28789d89fe9a3e28edecb8d8e"
-      },
-      "@std/http@0.218.2": {
-        "integrity": "54223b62702e665b9dab6373ea2e51235e093ef47228d21cfa0469ee5ac75c9b",
-        "dependencies": [
-          "jsr:@std/assert@^0.218.2",
-          "jsr:@std/encoding@^0.218.2"
-        ]
-      },
-      "@std/io@0.218.2": {
-        "integrity": "c64fbfa087b7c9d4d386c5672f291f607d88cb7d44fc299c20c713e345f2785f",
-        "dependencies": [
-          "jsr:@std/bytes@^0.218.2"
-        ]
-      },
-      "@std/media-types@0.218.2": {
-        "integrity": "1ed3bd2a05e44bad3fc2bab1767d0ce7f2fd68baee62a980751ce51633acb788"
-      },
-      "@std/path@0.218.2": {
-        "integrity": "b568fd923d9e53ad76d17c513e7310bda8e755a3e825e6289a0ce536404e2662",
-        "dependencies": [
-          "jsr:@std/assert@^0.218.2"
-        ]
-      }
+    "@std/assert@0.218.2": {
+      "integrity": "7f0a5a1a8cf86607cd6c2c030584096e1ffad27fc9271429a8cb48cfbdee5eaf"
     },
-    "npm": {
-      "@types/node@18.16.19": {
-        "integrity": "sha512-IXl7o+R9iti9eBW4Wg2hx1xQDig183jj7YLn8F7udNceyfkbn1ZxmzZXuak20gR40D7pIkIY1kYGx5VIGbaHKA==",
-        "dependencies": {}
-      },
-      "path-to-regexp@6.2.1": {
-        "integrity": "sha512-JLyh7xT1kizaEvcaXOQwOc2/Yhw6KZOvPf1S8401UyLk86CU79LN3vl7ztXGm/pZ+YjoyAJ4rxmHwbkBXJX+yw==",
-        "dependencies": {}
-      }
+    "@std/bytes@0.218.2": {
+      "integrity": "91fe54b232dcca73856b79a817247f4a651dbb60d51baafafb6408c137241670"
+    },
+    "@std/crypto@0.218.2": {
+      "integrity": "8c5031a3a1c3ac3bed3c0d4bed2fe7e7faedcb673bbfa0edd10570c8452f5cd2",
+      "dependencies": [
+        "jsr:@std/assert@~0.218.2",
+        "jsr:@std/encoding@~0.218.2"
+      ]
+    },
+    "@std/encoding@0.218.2": {
+      "integrity": "da55a763c29bf0dbf06fd286430b358266eb99c28789d89fe9a3e28edecb8d8e"
+    },
+    "@std/http@0.218.2": {
+      "integrity": "54223b62702e665b9dab6373ea2e51235e093ef47228d21cfa0469ee5ac75c9b",
+      "dependencies": [
+        "jsr:@std/assert@~0.218.2",
+        "jsr:@std/encoding@~0.218.2"
+      ]
+    },
+    "@std/io@0.218.2": {
+      "integrity": "c64fbfa087b7c9d4d386c5672f291f607d88cb7d44fc299c20c713e345f2785f",
+      "dependencies": [
+        "jsr:@std/bytes@~0.218.2"
+      ]
+    },
+    "@std/media-types@0.218.2": {
+      "integrity": "1ed3bd2a05e44bad3fc2bab1767d0ce7f2fd68baee62a980751ce51633acb788"
+    },
+    "@std/path@0.218.2": {
+      "integrity": "b568fd923d9e53ad76d17c513e7310bda8e755a3e825e6289a0ce536404e2662",
+      "dependencies": [
+        "jsr:@std/assert@~0.218.2"
+      ]
+    }
+  },
+  "npm": {
+    "@types/node@18.16.19": {
+      "integrity": "sha512-IXl7o+R9iti9eBW4Wg2hx1xQDig183jj7YLn8F7udNceyfkbn1ZxmzZXuak20gR40D7pIkIY1kYGx5VIGbaHKA=="
+    },
+    "path-to-regexp@6.2.1": {
+      "integrity": "sha512-JLyh7xT1kizaEvcaXOQwOc2/Yhw6KZOvPf1S8401UyLk86CU79LN3vl7ztXGm/pZ+YjoyAJ4rxmHwbkBXJX+yw=="
     }
   },
   "redirects": {
@@ -143,6 +139,10 @@
     "https://deno.land/x/oak@14.2.0/types.ts": "09f0494db5d642e3492d23cd46da665d2df2590ef7e987b0412659260453d1f9",
     "https://deno.land/x/oak@14.2.0/util.ts": "22fb55001472158ed4bdf53ce1a6848e10860507aa9a2e16d0b92d2b420f2a90",
     "https://esm.sh/octokit@3.1.2?dts": "893be022afada9d0e7257eafae8743dd9d17decb5d905b6b5a2f60df9ca17de7",
+    "https://esm.sh/preact-render-to-string@5.1.19/X-ZHByZWFjdEAxMC41LjE1/denonext/preact-render-to-string.mjs": "5f7f349e72f586287e38fc3ec22fc6d0ec28e76f092027790f5be7f425e3c504",
+    "https://esm.sh/preact-render-to-string@5.1.19?deps=preact@10.5.15": "4d644c059d08b29576ebebc74c5a20688fa2f3c5198ae83d777dc3591c428887",
+    "https://esm.sh/preact@10.5.15": "4da6b254e794c7808f9adf676959fe368ad1d975b1d08d5fc9ab98419f155101",
+    "https://esm.sh/preact@10.5.15/denonext/preact.mjs": "1ede84814fd6cd83b6d28e6fdb64c9685f0d98f1d26b2e4de7728ff1f0c21332",
     "https://esm.sh/v135/@octokit/app@14.0.2/denonext/app.mjs": "4334bfe731978a9e3275cb53c26d9f1a78d202e926c9c6571765885350a678d4",
     "https://esm.sh/v135/@octokit/auth-app@6.0.1/denonext/auth-app.mjs": "14a0d001c97de201f2494ed78be41009d190df4e24878209805dca4ccb61a205",
     "https://esm.sh/v135/@octokit/auth-oauth-app@7.0.1/denonext/auth-oauth-app.mjs": "5db38d887d10dd263d764a53836e1874e87a5d3daceee2610f4f847bfa7b36e4",
@@ -179,6 +179,7 @@
     "https://esm.sh/v135/once@1.4.0/denonext/once.mjs": "5ab9193c36609f6c5cf6f1e2e37dd952c87d8ff0b0267433c29b228a2c470cd5",
     "https://esm.sh/v135/universal-github-app-jwt@1.1.1/denonext/universal-github-app-jwt.mjs": "546280ef9d50e167172bc039c0c2f4348a728ae1732f467af726b08491d2ea18",
     "https://esm.sh/v135/universal-user-agent@6.0.1/denonext/universal-user-agent.mjs": "053324bcacbaf066d185d6bf0a3797ee474d975f720ce75351238e420fc82c22",
-    "https://esm.sh/v135/wrappy@1.0.2/denonext/wrappy.mjs": "3c31e4782e0307cf56b319fcec6110f925dafe6cb47a8fa23350d480f5fa8b06"
+    "https://esm.sh/v135/wrappy@1.0.2/denonext/wrappy.mjs": "3c31e4782e0307cf56b319fcec6110f925dafe6cb47a8fa23350d480f5fa8b06",
+    "https://raw.githubusercontent.com/skymethod/denoflare/v0.6.0/common/xml_util.ts": "9638b77f4a099ccb039b3f3bcf6e34cfb4a98658ffbe0d228627e899f43d8671"
   }
 }
