@@ -89,9 +89,9 @@ jobs:
 
       - id: "setup-deno"
         name: "Set up Deno"
-        uses: denoland/setup-deno@v1
+        uses: denoland/setup-deno@v2
         with:
-          deno-version: 1.41.0
+          deno-version: 2.2.2
 
       - id: "set-builder-env"
         name: "Set environment variables for build"
