@@ -1,4 +1,4 @@
-import { IncomingRequestCf, R2Conditional, R2GetOptions, R2ListOptions, R2Object, R2ObjectBody, R2Range } from "./deps.ts";
+import { IncomingRequestCf, R2Conditional, R2GetOptions, R2ListOptions, R2Object, R2ObjectBody, R2Objects, R2Range } from "./deps.ts";
 import { computeDirectoryListingHtml } from "./listing.tsx";
 import { WorkerEnv } from "./worker_env.d.ts";
 
@@ -8,11 +8,12 @@ export default {
     async fetch(request: IncomingRequestCf, env: WorkerEnv): Promise<Response> {
         try {
             return await computeResponse(request, env);
-        } catch (e) {
-            if (typeof e === "object" && tryParseMessageCode(e.message) === 10039) { // The requested range is not satisfiable (10039)
+        } catch (e: unknown) {
+            if (e instanceof Error && tryParseMessageCode(e.message) === 10039) {
                 return new Response(e.message, { status: 416 });
             }
-            return new Response(`${e.stack || e}`, { status: 500 });
+            const errorMessage = e instanceof Error ? e.stack || e.message : String(e);
+            return new Response(errorMessage, { status: 500 });
         }
     },
 };
@@ -153,20 +154,20 @@ async function computeResponse(request: IncomingRequestCf, env: WorkerEnv): Prom
         };
         console.log(`list: ${JSON.stringify(options)}`);
         const objects = await bucket.list(options);
-        if (objects.delimitedPrefixes.length > 0 || objects.objects.length > 0) {
-            const { cursor } = objects;
-            console.log({
-                numPrefixes: objects.delimitedPrefixes.length,
-                numObjects: objects.objects.length,
-                truncated: objects.truncated,
-                cursor,
+
+        const filteredObjects = {
+            ...objects,
+            objects: objects.objects.filter((obj: R2Object) => !isHidden(objects, obj.key)),
+            delimitedPrefixes: objects.delimitedPrefixes.filter((prefix: string) => !isHidden(objects, prefix))
+        };
+
+        const { cursor } = filteredObjects;
+
+        return redirect
+            ? temporaryRedirect({ location: "/" + prefix })
+            : new Response(computeDirectoryListingHtml(filteredObjects, { prefix, cursor, directoryListingLimitParam }), {
+                headers: { "content-type": TEXT_HTML_UTF8 },
             });
-            return redirect
-                ? temporaryRedirect({ location: "/" + prefix })
-                : new Response(computeDirectoryListingHtml(objects, { prefix, cursor, directoryListingLimitParam }), {
-                    headers: { "content-type": TEXT_HTML_UTF8 },
-                });
-        }
     }
 
     // R2 response still not found, respond with 404
@@ -182,6 +183,16 @@ async function computeResponse(request: IncomingRequestCf, env: WorkerEnv): Prom
 
 function stringSetFromCsv(value: string | undefined) {
     return new Set((value ?? "").split(",").map((v) => v.trim()).filter((v) => v !== ""));
+}
+
+function isHidden(objects: R2Objects, key: string): boolean {
+    if (/^.*\/?\.[^/]+\.hidden$/.test(key)) return true;
+
+    const cleanKey = key.endsWith('/') ? key.slice(0, -1) : key;
+    const baseName = cleanKey.split('/').pop();
+    const parentPath = cleanKey.match(/^(.*\/)/)?.[1] ?? '';
+    const markerFile = `${parentPath}.${baseName}.hidden`;
+    return objects.objects.some((obj: R2Object) => obj.key === markerFile);
 }
 
 function notFound(method: string): Response {
