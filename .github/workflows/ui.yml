@@ -22,7 +22,7 @@ jobs:
 
       - id: "setup-deno"
         name: "Set up Deno"
-        uses: denoland/setup-deno@v1
+        uses: denoland/setup-deno@v2
         with:
           deno-version: 2.2.2
 
