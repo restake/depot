@@ -162,12 +162,7 @@ async function computeResponse(request: IncomingRequestCf, env: WorkerEnv): Prom
         };
 
         const { cursor } = filteredObjects;
-        console.log({
-            numPrefixes: filteredObjects.delimitedPrefixes.length,
-            numObjects: filteredObjects.objects.length,
-            truncated: filteredObjects.truncated,
-            cursor,
-        });
+
         return redirect
             ? temporaryRedirect({ location: "/" + prefix })
             : new Response(computeDirectoryListingHtml(filteredObjects, { prefix, cursor, directoryListingLimitParam }), {
