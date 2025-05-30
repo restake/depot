@@ -36,6 +36,11 @@
     "https://deno.land/std@0.207.0/yaml/schema/json.ts": "5f41dd7c2f1ad545ef6238633ce9ee3d444dfc5a18101e1768bd5504bf90e5e5",
     "https://deno.land/std@0.207.0/yaml/schema/mod.ts": "4472e827bab5025e92bc2eb2eeefa70ecbefc64b2799b765c69af84822efef32",
     "https://deno.land/std@0.207.0/yaml/stringify.ts": "fffc09c65c68d3d63f8159e8cbaa3f489bc20a8e55b4fbb61a8c2e9f914d1d02",
-    "https://deno.land/std@0.207.0/yaml/type.ts": "65553da3da3c029b6589c6e4903f0afbea6768be8fca61580711457151f2b30f"
+    "https://deno.land/std@0.207.0/yaml/type.ts": "65553da3da3c029b6589c6e4903f0afbea6768be8fca61580711457151f2b30f",
+    "https://esm.sh/preact-render-to-string@5.1.19/X-ZHByZWFjdEAxMC41LjE1/denonext/preact-render-to-string.mjs": "5f7f349e72f586287e38fc3ec22fc6d0ec28e76f092027790f5be7f425e3c504",
+    "https://esm.sh/preact-render-to-string@5.1.19?deps=preact@10.5.15": "4d644c059d08b29576ebebc74c5a20688fa2f3c5198ae83d777dc3591c428887",
+    "https://esm.sh/preact@10.5.15": "4da6b254e794c7808f9adf676959fe368ad1d975b1d08d5fc9ab98419f155101",
+    "https://esm.sh/preact@10.5.15/denonext/preact.mjs": "1ede84814fd6cd83b6d28e6fdb64c9685f0d98f1d26b2e4de7728ff1f0c21332",
+    "https://raw.githubusercontent.com/skymethod/denoflare/v0.6.0/common/xml_util.ts": "9638b77f4a099ccb039b3f3bcf6e34cfb4a98658ffbe0d228627e899f43d8671"
   }
 }
