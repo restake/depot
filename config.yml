@@ -8,7 +8,7 @@
   binaries:
     - "babylond"
   builder: "go"
-  builder_version: "1.23.3"
+  builder_version: "1.23.9"
   cpu: "generic"
   patches: false
   purpose: "node"
