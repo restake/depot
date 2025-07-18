@@ -292,7 +292,7 @@
   purpose: "node"
 
 - repository: "persistenceCore"
-  project_name: "persistence"
+  project_name: "persistenceCore"
   architecture: "x86_64"
   binaries:
     - "persistenceCore"
