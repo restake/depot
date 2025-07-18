@@ -280,6 +280,28 @@
   patches: false
   purpose: "node"
 
+- repository: "Passage3D"
+  project_name: "passage"
+  architecture: "x86_64"
+  binaries:
+    - "passage"
+  builder: "go"
+  builder_version: "1.20"
+  cpu: "generic"
+  patches: false
+  purpose: "node"
+
+- repository: "persistenceCore"
+  project_name: "persistence"
+  architecture: "x86_64"
+  binaries:
+    - "persistenceCore"
+  builder: "go"
+  builder_version: "1.23.6"
+  cpu: "generic"
+  patches: false
+  purpose: "node"
+
 # TOOLS
 - repository: "tmkms"
   project_name: "tmkms"
