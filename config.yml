@@ -291,6 +291,17 @@
   patches: false
   purpose: "node"
 
+- repository: "persistenceCore"
+  project_name: "persistenceCore"
+  architecture: "x86_64"
+  binaries:
+    - "persistenceCore"
+  builder: "go"
+  builder_version: "1.23.6"
+  cpu: "generic"
+  patches: false
+  purpose: "node"
+
 # TOOLS
 - repository: "tmkms"
   project_name: "tmkms"
