@@ -302,6 +302,17 @@
   patches: false
   purpose: "node"
 
+- repository: "chain-main"
+  project_name: "cronos"
+  architecture: "x86_64"
+  binaries:
+    - "chain-maind"
+  builder: "go"
+  builder_version: "1.22.4"
+  cpu: "generic"
+  patches: false
+  purpose: "node"
+
 # TOOLS
 - repository: "tmkms"
   project_name: "tmkms"
