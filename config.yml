@@ -313,6 +313,17 @@
   patches: false
   purpose: "node"
 
+- repository: "omniflixhub"
+  project_name: "omniflixhub"
+  architecture: "x86_64"
+  binaries:
+    - "omniflixhubd"
+  builder: "go"
+  builder_version: "1.22.4"
+  cpu: "generic"
+  patches: false
+  purpose: "node"
+
 # TOOLS
 - repository: "tmkms"
   project_name: "tmkms"
