@@ -323,6 +323,7 @@
   cpu: "generic"
   patches: false
   purpose: "node"
+  runner: "ubuntu-latest-l"
 
 # TOOLS
 - repository: "tmkms"

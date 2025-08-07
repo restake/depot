@@ -21,6 +21,10 @@ const build = async (repositoryName: string): Promise<void> => {
     await setEnv("DEPOT_RUN_BUILD", runBuild.toString());
     await setEnv("DEPOT_RUN_DOCKER_BUILD", runDockerBuild.toString());
 
+    // Set runner with default fallback
+    const runner = project.runner || "ubuntu-22.04-l";
+    await setEnv("DEPOT_RUNNER", runner);
+
     // The binaries we need to build for given project.
     if (runBuild === true) {
         await setEnv("DEPOT_BINARIES", await getProjectBinaryNames(project, "name"));
