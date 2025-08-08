@@ -46,6 +46,7 @@ jobs:
       depot_builder: "${{ steps.set-outputs.outputs.depot_builder }}"
       depot_builder_version: "${{ steps.set-outputs.outputs.depot_builder_version }}"
       depot_cpu: "${{ steps.set-outputs.outputs.depot_cpu }}"
+      depot_runner: "${{ steps.set-outputs.outputs.depot_runner }}"
     steps:
       - id: "checkout"
         name: "Checkout code"
@@ -74,12 +75,13 @@ jobs:
           echo "depot_builder=${{ env.DEPOT_BUILDER }}" >> $GITHUB_OUTPUT
           echo "depot_builder_version=${{ env.DEPOT_BUILDER_VERSION }}" >> $GITHUB_OUTPUT
           echo "depot_cpu=${{ env.DEPOT_CPU }}" >> $GITHUB_OUTPUT
+          echo "depot_runner=${{ env.DEPOT_RUNNER }}" >> $GITHUB_OUTPUT
           printf "depot_binaries=%s\n" "${DEPOT_BINARIES//$'\n'/\\n}" >> $GITHUB_OUTPUT
           printf "depot_binary_build_name=%s\n" "${DEPOT_BINARY_BUILD_NAME//$'\n'/\\n}" >> $GITHUB_OUTPUT
 
   build:
     name: "Build"
-    runs-on: "ubuntu-22.04-l"
+    runs-on: ${{ needs.outputs.outputs.depot_runner }}
     needs: ["outputs"]
     if: ${{ needs.outputs.outputs.depot_run_build == 'true' }}
     steps:

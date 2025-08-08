@@ -13,4 +13,5 @@ export type DepotProject = {
     run_docker_build?: boolean;
     patches: boolean;
     purpose: string;
+    runner?: string;
 };
