@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+sudo apt-get update && sudo apt-get install -y --no-install-recommends libclang-dev
+
 cd "${DEPOT_PROJECT_NAME}"
 mkdir bin
 
