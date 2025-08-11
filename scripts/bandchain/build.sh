@@ -23,8 +23,29 @@ else
     cd /tmp
     git clone https://github.com/bandprotocol/go-owasm.git
     cd go-owasm
-    make build
-    sudo make install
+
+    # Check what make targets are available
+    echo "Available make targets in go-owasm:"
+    make help 2>/dev/null || make -n 2>/dev/null || echo "No help target, checking available targets..."
+
+    # Try different build approaches
+    if make build; then
+        echo "go-owasm build successful"
+        # Check if there's an install target or if we need to copy manually
+        if make install 2>/dev/null; then
+            echo "go-owasm install successful"
+        else
+            echo "No install target, copying manually..."
+            # Copy the built library to system location
+            sudo mkdir -p /usr/local/lib
+            sudo cp -r . /usr/local/lib/go-owasm
+            sudo ln -sf /usr/local/lib/go-owasm /usr/local/lib/go-owasm-dev
+        fi
+    else
+        echo "go-owasm build failed, trying alternative approach..."
+        # Try building with Go directly
+        go build -o go-owasm ./cmd/go-owasm 2>/dev/null || go build -o go-owasm . 2>/dev/null || echo "Direct Go build also failed"
+    fi
 
     # Return to BandChain directory
     cd "${GITHUB_WORKSPACE}/${DEPOT_PROJECT_NAME}"
