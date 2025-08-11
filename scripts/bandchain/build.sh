@@ -4,72 +4,13 @@ set -euo pipefail
 cd "${DEPOT_PROJECT_NAME}"
 mkdir bin
 
-# Try to install required C libraries via apt first (faster)
-echo "Installing required C libraries..."
-if sudo apt-get install -y libgo-owasm-dev wasmtime-dev 2>/dev/null; then
-    echo "C libraries installed via apt"
-else
-    echo "C libraries not available via apt, using pre-built binaries..."
+# Grab static libwasmvm
+wasmvm_version="$(go list -json -m all | jq -cr 'select(.Path == "github.com/CosmWasm/wasmvm/v2") | .Replace.Version // .Version')"
+curl -JLO "https://github.com/CosmWasm/wasmvm/releases/download/${wasmvm_version}/libwasmvm_muslc.x86_64.a"
+ln -s libwasmvm_muslc.x86_64.a libwasmvm.x86_64.a
 
-    # Download pre-built wasmtime instead of building from Rust
-    cd /tmp
-    WASMTIME_VERSION="v20.0.0"
-    wget "https://github.com/bytecodealliance/wasmtime/releases/download/${WASMTIME_VERSION}/wasmtime-${WASMTIME_VERSION}-x86_64-linux.tar.xz"
-    tar -xf "wasmtime-${WASMTIME_VERSION}-x86_64-linux.tar.xz"
-    sudo cp wasmtime-${WASMTIME_VERSION}-x86_64-linux/wasmtime /usr/local/bin/
-    sudo chmod +x /usr/local/bin/wasmtime
-
-    # Build and install go-owasm from source (Go only)
-    cd /tmp
-    git clone https://github.com/bandprotocol/go-owasm.git
-    cd go-owasm
-
-    # Check what make targets are available
-    echo "Available make targets in go-owasm:"
-    make help 2>/dev/null || make -n 2>/dev/null || echo "No help target, checking available targets..."
-
-    # Try different build approaches
-    if make build; then
-        echo "go-owasm build successful"
-        # Check if there's an install target or if we need to copy manually
-        if make install 2>/dev/null; then
-            echo "go-owasm install successful"
-        else
-            echo "No install target, copying manually..."
-            # Copy the built library to system location
-            sudo mkdir -p /usr/local/lib
-            sudo cp -r . /usr/local/lib/go-owasm
-            sudo ln -sf /usr/local/lib/go-owasm /usr/local/lib/go-owasm-dev
-        fi
-    else
-        echo "go-owasm build failed, trying alternative approach..."
-        # Try building with Go directly
-        go build -o go-owasm ./cmd/go-owasm 2>/dev/null || go build -o go-owasm . 2>/dev/null || echo "Direct Go build also failed"
-    fi
-
-    # Return to BandChain directory
-    cd "${GITHUB_WORKSPACE}/${DEPOT_PROJECT_NAME}"
-fi
-
-# Build BandChain with static linking for cross-machine deployment
-echo "Building BandChain with static linking..."
-export CGO_ENABLED=1
-export GOOS=linux
-export GOARCH=amd64
-export CGO_LDFLAGS="-static -L/usr/local/lib"
-export CGO_CFLAGS="-I/usr/local/include"
-
-# Force static linking for portability
-make CC="x86_64-linux-musl-gcc" CGO_LDFLAGS="-static -L/usr/local/lib" LEDGER_ENABLED=false LINK_STATICALLY=true install
-
-# Verify the binary is static
-echo "Verifying static binary..."
-if ldd "${GITHUB_WORKSPACE}/tools/go-1.24.3/bin/bandd" 2>/dev/null; then
-    echo "ERROR: Binary is not static - will fail on other machines!"
-    exit 1
-else
-    echo "✅ Binary is static - ready for cross-machine deployment"
-fi
+# BandChain uses 'make install' which installs to Go bin directory
+make CC="x86_64-linux-musl-gcc" CGO_LDFLAGS="-L." LEDGER_ENABLED=false LINK_STATICALLY=true install
 
 build_binaries="$(deno run --allow-read --allow-env ../utils/binaries.ts)"
 
