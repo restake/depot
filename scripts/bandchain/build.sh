@@ -4,6 +4,8 @@ set -euo pipefail
 cd "${DEPOT_PROJECT_NAME}"
 mkdir bin
 
+sudo apt-get install -y libgo-owasm-dev wasmtime-dev
+
 # BandChain uses 'make install' which installs to Go bin directory
 make CC="x86_64-linux-musl-gcc" CGO_LDFLAGS="-L." LEDGER_ENABLED=false LINK_STATICALLY=true install
 
