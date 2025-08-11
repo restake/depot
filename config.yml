@@ -442,6 +442,18 @@
   patches: false
   purpose: "node"
 
+- repository: "chain"
+  project_name: "bandchain"
+  architecture: "x86_64"
+  binaries:
+    - "bandd"
+  builder: "go"
+  builder_version: "1.24.3"
+  cpu: "generic"
+  patches: false
+  purpose: "node"
+  runner: "ubuntu-latest"
+
 # Docker images
 
 - repository: "bouncebit"
