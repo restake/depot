@@ -9,17 +9,17 @@ echo "Installing required C libraries..."
 if sudo apt-get install -y libgo-owasm-dev wasmtime-dev 2>/dev/null; then
     echo "C libraries installed via apt"
 else
-    echo "C libraries not available via apt, building from source..."
+    echo "C libraries not available via apt, using pre-built binaries..."
 
-    # Build and install wasmtime from source
+    # Download pre-built wasmtime instead of building from Rust
     cd /tmp
-    git clone https://github.com/bytecodealliance/wasmtime.git
-    cd wasmtime
-    git checkout v20.0.0
-    cargo build --release --bin wasmtime
-    sudo cp target/release/wasmtime /usr/local/bin/
+    WASMTIME_VERSION="v20.0.0"
+    wget "https://github.com/bytecodealliance/wasmtime/releases/download/${WASMTIME_VERSION}/wasmtime-${WASMTIME_VERSION}-x86_64-linux.tar.xz"
+    tar -xf "wasmtime-${WASMTIME_VERSION}-x86_64-linux.tar.xz"
+    sudo cp wasmtime-${WASMTIME_VERSION}-x86_64-linux/wasmtime /usr/local/bin/
+    sudo chmod +x /usr/local/bin/wasmtime
 
-    # Build and install go-owasm from source
+    # Build and install go-owasm from source (Go only)
     cd /tmp
     git clone https://github.com/bandprotocol/go-owasm.git
     cd go-owasm
