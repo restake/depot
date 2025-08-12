@@ -324,6 +324,18 @@
   patches: false
   purpose: "node"
 
+- repository: "juno"
+  project_name: "juno"
+  architecture: "x86_64"
+  binaries:
+    - "juno"
+  builder: "go"
+  builder_version: "1.24.3"
+  cpu: "generic"
+  patches: false
+  purpose: "node"
+  runner: "ubuntu-latest"
+
 # TOOLS
 - repository: "tmkms"
   project_name: "tmkms"
