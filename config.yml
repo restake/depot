@@ -442,6 +442,17 @@
   patches: false
   purpose: "node"
 
+- repository: "sunrise-data"
+  project_name: "sunrise-data"
+  architecture: "x86_64"
+  binaries:
+    - "sunrise-data"
+  builder: "go"
+  builder_version: "1.24.3"
+  cpu: "generic"
+  patches: false
+  purpose: "tool"
+
 # Docker images
 
 - repository: "bouncebit"
