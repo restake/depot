@@ -460,3 +460,15 @@
   architecture: "x86_64"
   run_docker_build: true
   run_build: false
+
+- repository: "firedancer"
+  project_name: "frankendancer"
+  architecture: "x86_64"
+  binaries:
+    - "fdctl"
+    - "solana"
+  builder: "rust"
+  builder_version: "1.81"
+  cpu: "generic"
+  patches: false
+  purpose: "node"
