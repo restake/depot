@@ -6,6 +6,7 @@ export const GITHUB_WORKSPACE = Deno.env.get("GITHUB_WORKSPACE") ?? Deno.cwd();
 
 export const DEPOT_CONFIG_PATH = `${GITHUB_WORKSPACE}/config.yml`;
 export const DEPOT_REPO_NAME = Deno.env.get("DEPOT_REPOSITORY_NAME") ?? "sui";
+export const DEPOT_REPOSITORY_ORG = Deno.env.get("DEPOT_REPOSITORY_ORG") ?? "sui";
 
 export const getConfig = async (filepath: string) => {
     try {

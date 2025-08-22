@@ -5,7 +5,21 @@ import { DEPOT_CONFIG_PATH, DEPOT_REPO_NAME, GITHUB_WORKSPACE } from "./config.t
 
 export const getBinaries = async (repositoryName: string): Promise<Record<string, string>> => {
     const config = await getConfig(DEPOT_CONFIG_PATH) as DepotProject[];
-    const project = config.find((project) => project.repository === repositoryName);
+
+    let project: DepotProject | undefined;
+
+    // Try to find project using org/repo format first (most specific)
+    if (repositoryName.includes('/')) {
+        const [org, repo] = repositoryName.split('/');
+        project = config.find((project) =>
+            project.repository_org === org && project.repository_name === repo
+        );
+    }
+
+    // If not found, try to find project using repository field (legacy)
+    if (!project) {
+        project = config.find((project) => project.repository === repositoryName);
+    }
 
     if (!project) {
         throw new Error(`Project ${repositoryName} not found in config file`);
@@ -25,18 +39,25 @@ export const getBinaries = async (repositoryName: string): Promise<Record<string
 
 export const getDockerBinaries = async (repositoryName: string): Promise<string> => {
     const config = await getConfig(DEPOT_CONFIG_PATH) as DepotProject[];
-    const project = config.find((project) => project.repository === repositoryName);
+
+    let project: DepotProject | undefined;
+
+    // Try to find project using org/repo format first (most specific)
+    if (repositoryName.includes('/')) {
+        const [org, repo] = repositoryName.split('/');
+        project = config.find((project) =>
+            project.repository_org === org && project.repository_name === repo
+        );
+    }
+
+    // If not found, try to find project using repository field (legacy)
+    if (!project) {
+        project = config.find((project) => project.repository === repositoryName);
+    }
 
     if (!project) {
         throw new Error(`Project ${repositoryName} not found in config file`);
     }
 
     return project.docker_binaries?.join(',') ?? "";
-}
-
-if (DEPOT_REPO_NAME) {
-    console.log(JSON.stringify(await getBinaries(DEPOT_REPO_NAME)));
-} else {
-    console.error("DEPOT_REPOSITORY_NAME is not set");
-    Deno.exit(1);
 }
