@@ -5,7 +5,22 @@ import { DEPOT_CONFIG_PATH, DEPOT_REPO_NAME, GITHUB_WORKSPACE } from "./config.t
 
 export const getBinaries = async (repositoryName: string): Promise<Record<string, string>> => {
     const config = await getConfig(DEPOT_CONFIG_PATH) as DepotProject[];
-    const project = config.find((project) => project.repository === repositoryName);
+
+    // Try to find project using repository field first (legacy)
+    let project = config.find((project) => project.repository === repositoryName);
+
+    // If not found, try to parse as org/repo format
+    if (!project && repositoryName.includes('/')) {
+        const [org, repo] = repositoryName.split('/');
+        project = config.find((project) =>
+            project.repository_org === org && project.repository_name === repo
+        );
+    }
+
+    // If still not found, try just the repo name (for backwards compatibility)
+    if (!project) {
+        project = config.find((project) => project.repository === repositoryName.split('/').pop());
+    }
 
     if (!project) {
         throw new Error(`Project ${repositoryName} not found in config file`);
@@ -25,7 +40,22 @@ export const getBinaries = async (repositoryName: string): Promise<Record<string
 
 export const getDockerBinaries = async (repositoryName: string): Promise<string> => {
     const config = await getConfig(DEPOT_CONFIG_PATH) as DepotProject[];
-    const project = config.find((project) => project.repository === repositoryName);
+
+    // Try to find project using repository field first (legacy)
+    let project = config.find((project) => project.repository === repositoryName);
+
+    // If not found, try to parse as org/repo format
+    if (!project && repositoryName.includes('/')) {
+        const [org, repo] = repositoryName.split('/');
+        project = config.find((project) =>
+            project.repository_org === org && project.repository_name === repo
+        );
+    }
+
+    // If still not found, try just the repo name (for backwards compatibility)
+    if (!project) {
+        project = config.find((project) => project.repository === repositoryName.split('/').pop());
+    }
 
     if (!project) {
         throw new Error(`Project ${repositoryName} not found in config file`);
