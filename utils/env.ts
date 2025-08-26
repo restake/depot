@@ -41,13 +41,11 @@ const build = async (repositoryOrg: string, repositoryName: string): Promise<voi
 
         // Only get Docker binaries if Docker builds are enabled
         if (project.run_docker_build === true) {
-            // For getDockerBinaries, we need to use the same identifier logic
             let dockerRepoIdentifier: string;
             if (project.repository) {
-                // Legacy format
+                // Legacy
                 dockerRepoIdentifier = project.repository;
             } else if (project.repository_org && project.repository_name) {
-                // New explicit format
                 dockerRepoIdentifier = `${project.repository_org}/${project.repository_name}`;
             } else {
                 throw new Error(`Project ${project.project_name} has no valid repository identifier for docker binaries`);
@@ -82,14 +80,12 @@ const setEnv = async (key: string, value: string | string[] | boolean): Promise<
 };
 
 const getProjectBinaryNames = async (project: DepotProject, target: string): Promise<string> => {
-    // For getBinaries, we need to use the project's identifier
     let repoIdentifier: string;
 
     if (project.repository) {
-        // Legacy format
+        // Legacy
         repoIdentifier = project.repository;
     } else if (project.repository_org && project.repository_name) {
-        // New explicit format
         repoIdentifier = `${project.repository_org}/${project.repository_name}`;
     } else {
         throw new Error(`Project ${project.project_name} has no valid repository identifier`);

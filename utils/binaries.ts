@@ -1,14 +1,13 @@
 import { getConfig } from "./config.ts";
 import { DepotProject } from "./types.ts";
 
-import { DEPOT_CONFIG_PATH, DEPOT_REPO_NAME, GITHUB_WORKSPACE } from "./config.ts";
+import { DEPOT_CONFIG_PATH, DEPOT_REPO_NAME, DEPOT_REPOSITORY_ORG, GITHUB_WORKSPACE } from "./config.ts";
 
 export const getBinaries = async (repositoryName: string): Promise<Record<string, string>> => {
     const config = await getConfig(DEPOT_CONFIG_PATH) as DepotProject[];
 
     let project: DepotProject | undefined;
 
-    // Try to find project using org/repo format first (most specific)
     if (repositoryName.includes('/')) {
         const [org, repo] = repositoryName.split('/');
         project = config.find((project) =>
@@ -16,7 +15,7 @@ export const getBinaries = async (repositoryName: string): Promise<Record<string
         );
     }
 
-    // If not found, try to find project using repository field (legacy)
+    // LEGACY
     if (!project) {
         project = config.find((project) => project.repository === repositoryName);
     }
@@ -42,15 +41,13 @@ export const getDockerBinaries = async (repositoryName: string): Promise<string>
 
     let project: DepotProject | undefined;
 
-    // Try to find project using org/repo format first (most specific)
     if (repositoryName.includes('/')) {
         const [org, repo] = repositoryName.split('/');
         project = config.find((project) =>
             project.repository_org === org && project.repository_name === repo
         );
     }
-
-    // If not found, try to find project using repository field (legacy)
+    // LEGACY
     if (!project) {
         project = config.find((project) => project.repository === repositoryName);
     }
@@ -60,4 +57,17 @@ export const getDockerBinaries = async (repositoryName: string): Promise<string>
     }
 
     return project.docker_binaries?.join(',') ?? "";
+}
+
+if (DEPOT_REPO_NAME) {
+    let repositoryIdentifier = DEPOT_REPO_NAME;
+
+    if (DEPOT_REPOSITORY_ORG && DEPOT_REPOSITORY_ORG !== "") {
+        repositoryIdentifier = `${DEPOT_REPOSITORY_ORG}/${DEPOT_REPO_NAME}`;
+    }
+
+    console.log(JSON.stringify(await getBinaries(repositoryIdentifier)));
+} else {
+    console.error("DEPOT_REPOSITORY_NAME is not set");
+    Deno.exit(1);
 }
