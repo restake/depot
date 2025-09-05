@@ -453,6 +453,17 @@
   patches: false
   purpose: "tool"
 
+- repository: "v4-chain"
+  project_name: "dydx"
+  architecture: "x86_64"
+  binaries:
+    - "dydxprotocold"
+  builder: "go"
+  builder_version: "1.22.2"
+  cpu: "generic"
+  patches: false
+  purpose: "node"
+
 # Docker images
 
 - repository: "bouncebit"
