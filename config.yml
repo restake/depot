@@ -453,17 +453,6 @@
   patches: false
   purpose: "tool"
 
-- repository: "nilchain"
-  project_name: "nilchain"
-  architecture: "x86_64"
-  binaries:
-    - "nilchaind"
-  builder: "go"
-  builder_version: "1.23.4"
-  cpu: "generic"
-  patches: false
-  purpose: "node"
-
 # Docker images
 
 - repository: "bouncebit"
