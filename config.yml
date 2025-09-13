@@ -141,7 +141,7 @@
     - "solana-keygen"
   builder: "rust"
   builder_version: "1.75"
-  cpu: "znver3"
+  cpu: "znver4"
   patches: false
   purpose: "node"
 
