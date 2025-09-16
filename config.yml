@@ -464,6 +464,17 @@
   patches: false
   purpose: "node"
 
+- repository: "slinky"
+  project_name: "slinky"
+  architecture: "x86_64"
+  binaries:
+    - "slinky"
+  builder: "go"
+  builder_version: "1.23.2"
+  cpu: "generic"
+  patches: false
+  purpose: "tool"
+
 # Docker images
 
 - repository: "bouncebit"
