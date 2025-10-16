@@ -404,7 +404,7 @@
     - "eotsd"
     - "fpd"
   builder: "go"
-  builder_version: "1.23.4"
+  builder_version: "1.25.0"
   cpu: "generic"
   patches: false
   purpose: "tool"
