@@ -2,6 +2,13 @@
 set -euo pipefail
 
 cd "${DEPOT_PROJECT_NAME}"
+
+# Fetch full git history if this is a shallow clone
+# This is needed because the build process (build/ci.go) requires access to git commit objects
+if git rev-parse --is-shallow-repository >/dev/null 2>&1; then
+    git fetch --unshallow || git fetch --depth=0
+fi
+
 mkdir bin
 
 make geth
