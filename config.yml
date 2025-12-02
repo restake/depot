@@ -166,7 +166,7 @@
   binaries:
     - "bspagent"
   builder: "go"
-  builder_version: "1.21.5"
+  builder_version: "1.25.1"
   cpu: "generic"
   patches: false
   purpose: "node"
@@ -177,7 +177,7 @@
   binaries:
     - "geth"
   builder: "go"
-  builder_version: "1.21.5"
+  builder_version: "1.25.1"
   cpu: "generic"
   patches: false
   purpose: "node"
