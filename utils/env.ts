@@ -1,14 +1,22 @@
 import { getConfig } from "./config.ts";
 import { getBinaries, getDockerBinaries } from "./binaries.ts";
 
-import { DEPOT_CONFIG_PATH, DEPOT_REPO_NAME, GITHUB_ENV_PATH, GITHUB_IS_CI } from "./config.ts";
+import { DEPOT_CONFIG_PATH, DEPOT_REPO_NAME, DEPOT_REPOSITORY_ORG, GITHUB_ENV_PATH, GITHUB_IS_CI } from "./config.ts";
 import { DepotProject } from "./types.ts";
 
-const build = async (repositoryName: string): Promise<void> => {
+const build = async (repositoryOrg: string, repositoryName: string): Promise<void> => {
     const config = await getConfig(DEPOT_CONFIG_PATH) as DepotProject[];
-    const project = config.find((project) => project.repository === repositoryName);
+
+    let project = config.find((project) =>
+        project.repository_org === repositoryOrg && project.repository_name === repositoryName
+    );
+
     if (!project) {
-        throw new Error(`Project ${repositoryName} not found in config file`);
+        project = config.find((project) => project.repository === repositoryName);
+    }
+
+    if (!project) {
+        throw new Error(`Project ${repositoryOrg}/${repositoryName} not found in config file`);
     }
 
     // Set automatic_builds to true by default
@@ -25,12 +33,29 @@ const build = async (repositoryName: string): Promise<void> => {
     const runner = project.runner || "ubuntu-22.04-l";
     await setEnv("DEPOT_RUNNER", runner);
 
-    // The binaries we need to build for given project.
+        // The binaries we need to build for given project.
     if (runBuild === true) {
         await setEnv("DEPOT_BINARIES", await getProjectBinaryNames(project, "name"));
         await setEnv("DEPOT_BINARY_PATHS", await getProjectBinaryNames(project, "path"));
         await setEnv("DEPOT_BINARY_BUILD_NAME", await getProjectBinaryNames(project, "build"));
-        await setEnv("DEPOT_DOCKER_BINARIES", await getDockerBinaries(repositoryName));
+
+        // Only get Docker binaries if Docker builds are enabled
+        if (project.run_docker_build === true) {
+            let dockerRepoIdentifier: string;
+            if (project.repository) {
+                // Legacy
+                dockerRepoIdentifier = project.repository;
+            } else if (project.repository_org && project.repository_name) {
+                dockerRepoIdentifier = `${project.repository_org}/${project.repository_name}`;
+            } else {
+                throw new Error(`Project ${project.project_name} has no valid repository identifier for docker binaries`);
+            }
+
+            await setEnv("DEPOT_DOCKER_BINARIES", await getDockerBinaries(dockerRepoIdentifier));
+        } else {
+            // Set empty docker binaries if Docker builds are disabled
+            await setEnv("DEPOT_DOCKER_BINARIES", "");
+        }
     }
 
     for (const key in project) {
@@ -55,7 +80,18 @@ const setEnv = async (key: string, value: string | string[] | boolean): Promise<
 };
 
 const getProjectBinaryNames = async (project: DepotProject, target: string): Promise<string> => {
-    const binaries = await getBinaries(project.repository);
+    let repoIdentifier: string;
+
+    if (project.repository) {
+        // Legacy
+        repoIdentifier = project.repository;
+    } else if (project.repository_org && project.repository_name) {
+        repoIdentifier = `${project.repository_org}/${project.repository_name}`;
+    } else {
+        throw new Error(`Project ${project.project_name} has no valid repository identifier`);
+    }
+
+    const binaries = await getBinaries(repoIdentifier);
     return project.binaries.map((binary) => {
         if (target == "name") {
             return binaries[binary].split("/").pop();
@@ -71,9 +107,9 @@ const getRandomNumber = (): number => {
     return Math.floor(100000 + Math.random() * 900000);
 };
 
-if (DEPOT_REPO_NAME) {
-    build(DEPOT_REPO_NAME);
+if (DEPOT_REPO_NAME && DEPOT_REPOSITORY_ORG) {
+    build(DEPOT_REPOSITORY_ORG, DEPOT_REPO_NAME);
 } else {
-    console.error("DEPOT_REPOSITORY_NAME is not set again");
+    console.error("DEPOT_REPOSITORY_ORG or DEPOT_REPOSITORY_NAME is not set");
     Deno.exit(1);
 }
