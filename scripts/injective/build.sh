@@ -27,6 +27,13 @@ go build \
     -o injectived \
     ./cmd/injectived
 
+go build \
+    -tags "netgo" \
+    -ldflags "-s -w ${VERSION_FLAGS}" \
+    -trimpath \
+    -o peggo \
+    ./cmd/peggo
+
 # Ship dynamic libwasmvm alongside the binary
 wasmvm_version="$(go list -json -m all | jq -cr 'select(.Path == "github.com/CosmWasm/wasmvm/v2") | .Replace.Version // .Version')"
 curl -sLo bin/libwasmvm.x86_64.so "https://github.com/CosmWasm/wasmvm/releases/download/${wasmvm_version}/libwasmvm.x86_64.so"

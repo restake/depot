@@ -18,6 +18,7 @@
   architecture: "x86_64"
   binaries:
     - "injectived"
+    - "peggo"
   builder: "go"
   builder_version: "1.23.9"
   cpu: "generic"
