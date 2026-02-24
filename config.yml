@@ -13,6 +13,17 @@
   patches: false
   purpose: "node"
 
+- repository: "injective-core"
+  project_name: "injective"
+  architecture: "x86_64"
+  binaries:
+    - "injectived"
+  builder: "go"
+  builder_version: "1.23.9"
+  cpu: "generic"
+  patches: false
+  purpose: "node"
+
 - repository: "composable-cosmos"
   automatic_builds: false
   run_docker_build: true
