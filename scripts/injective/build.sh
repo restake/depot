@@ -20,26 +20,19 @@ VERSION_FLAGS="-X ${INJECTIVED_VERSION_PKG}.AppVersion=${APP_VERSION} \
 -X ${COSMOS_VERSION_PKG}.AppName=injectived \
 -X ${COSMOS_VERSION_PKG}.Commit=${GIT_COMMIT}"
 
-go build \
-    -tags "netgo" \
-    -ldflags "-s -w ${VERSION_FLAGS}" \
-    -trimpath \
-    -o injectived \
-    ./cmd/injectived
-
-go build \
-    -tags "netgo" \
-    -ldflags "-s -w ${VERSION_FLAGS}" \
-    -trimpath \
-    -o peggo \
-    ./cmd/peggo
-
-# Ship dynamic libwasmvm alongside the binary
-wasmvm_version="$(go list -json -m all | jq -cr 'select(.Path == "github.com/CosmWasm/wasmvm/v2") | .Replace.Version // .Version')"
-curl -sLo bin/libwasmvm.x86_64.so "https://github.com/CosmWasm/wasmvm/releases/download/${wasmvm_version}/libwasmvm.x86_64.so"
-
 build_binaries="$(deno run --allow-read --allow-env ../utils/binaries.ts)"
 
-echo "${build_binaries}" | jq -r 'to_entries[] | "\(.key) \(.value)"' | while read -r binary path; do
-    mv -v "${GITHUB_WORKSPACE}/injective/${binary}" "${path}"
-done
+binaries=$(echo -e "${DEPOT_BINARY_BUILD_NAME}")
+while IFS= read -r binary; do
+    output_path="$(echo "${build_binaries}" | jq -r --arg b "${binary}" '.[$b]')"
+    go build \
+        -tags "netgo" \
+        -ldflags "-s -w ${VERSION_FLAGS}" \
+        -trimpath \
+        -o "${output_path}" \
+        "./cmd/${binary}"
+done <<< "${binaries}"
+
+# Ship dynamic libwasmvm alongside injectived
+wasmvm_version="$(go list -json -m all | jq -cr 'select(.Path == "github.com/CosmWasm/wasmvm/v2") | .Replace.Version // .Version')"
+curl -sLo bin/libwasmvm.x86_64.so "https://github.com/CosmWasm/wasmvm/releases/download/${wasmvm_version}/libwasmvm.x86_64.so"
