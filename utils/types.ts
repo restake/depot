@@ -1,5 +1,7 @@
 export type DepotProject = {
-    repository: string;
+    repository?: string;
+    repository_org?: string;
+    repository_name?: string;
     automatic_builds?: boolean;
     project_name: string;
     architecture: string;
