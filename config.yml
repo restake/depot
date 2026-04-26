@@ -20,7 +20,7 @@
     - "injectived"
     - "peggo"
   builder: "go"
-  builder_version: "1.23.9"
+  builder_version: "1.26.2"
   cpu: "generic"
   patches: false
   purpose: "node"
